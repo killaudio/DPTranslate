@@ -1,0 +1,54 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DPfinal" >
+
+    <Button
+        android:id="@+id/go"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="16dp"
+        android:layout_toRightOf="@+id/textToTranslate"
+        android:text="@string/translate"
+        android:onClick="tryTranslate" />
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textToTranslate"
+        android:layout_alignTop="@+id/go"
+        android:text="@string/title"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/translatedText"
+        android:layout_centerVertical="true"
+        android:text="@string/stMeans" />
+
+    <EditText
+        android:id="@+id/textToTranslate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/go"
+        android:layout_marginLeft="18dp"
+        android:ems="10"
+        android:hint="@string/editHint"
+        android:inputType="textMultiLine" />
+
+    <TextView
+        android:id="@+id/translatedText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textToTranslate"
+        android:layout_below="@+id/textView2"
+        android:layout_marginTop="21dp"
+        android:hint="@string/hintDummy" />
+
+</RelativeLayout>
