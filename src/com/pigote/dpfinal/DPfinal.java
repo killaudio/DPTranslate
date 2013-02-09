@@ -1,12 +1,8 @@
 package com.pigote.dpfinal;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import com.memetix.mst.language.Language;
+import com.memetix.mst.translate.Translate;
 
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -14,7 +10,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.EditText;
@@ -59,14 +54,12 @@ public class DPfinal extends Activity {
 	
 	private class DoTranslate extends AsyncTask<String, String, String>{
 		
-		private final String DEBUG_TAG = null;
-
 		@Override
 		protected String doInBackground(String... params) {
 			// params comes from the execute() call: params[0] is the url.
             try {
                 return goTranslate(params[0]);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 return "Unable to connect to translation service.";
             }
 		}
@@ -78,28 +71,15 @@ public class DPfinal extends Activity {
         }
        
 	     // Do the web service tango here
-        private String goTranslate(String myurl) throws IOException {
+        private String goTranslate(String myText) throws Exception {
 	         InputStream is = null;
-	         // Only display the first 500 characters of the retrieved
-	         // web page content.
-	         int len = 500;
-	             
 	         try {
-	             URL url = new URL(myurl);
-	             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-	             conn.setReadTimeout(10000 /* milliseconds */);
-	             conn.setConnectTimeout(15000 /* milliseconds */);
-	             conn.setRequestMethod("GET");
-	             conn.setDoInput(true);
-	             // Starts the query
-	             conn.connect();
-	             int response = conn.getResponseCode();
-	             Log.d(DEBUG_TAG, "The response is: " + response);
-	             is = conn.getInputStream();
-	
-	             // Convert the InputStream into a string
-	             String contentAsString = readIt(is, len);
-	             return contentAsString;
+
+	        	 Translate.setClientId("DPFinal");
+	        	 Translate.setClientSecret("+K1b9VU83HAp3hY2N/qYjKyjFVB8MWqOM+Yy1w9PAds=");
+
+	        	 String translatedText = Translate.execute(myText, Language.SPANISH, Language.ENGLISH);
+	             return translatedText;
 	             
 	         // Makes sure that the InputStream is closed after the app is
 	         // finished using it.
@@ -109,15 +89,6 @@ public class DPfinal extends Activity {
 	             } 
 	         }
 	    }
-     // Reads an InputStream and converts it to a String.
-        public String readIt(InputStream stream, int len) throws IOException, UnsupportedEncodingException {
-            Reader reader = null;
-            reader = new InputStreamReader(stream, "UTF-8");        
-            char[] buffer = new char[len];
-            reader.read(buffer);
-            return new String(buffer);
-        }
-        
 	}
 	
 }
