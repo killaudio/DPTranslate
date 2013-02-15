@@ -51,4 +51,14 @@
         android:layout_marginTop="21dp"
         android:hint="@string/hintDummy" />
 
+    <Button
+        android:id="@+id/read"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/go"
+        android:layout_alignTop="@+id/textToTranslate"
+        android:layout_marginTop="15dp"
+        android:text="@string/read"
+        android:onClick="tryRead" />
+
 </RelativeLayout>

@@ -8,5 +8,6 @@
     <string name="stMeans">Means:</string>
     <string name="editHint">Enter text in spanish</string>
     <string name="hintDummy">Introduce texto en español</string>
+    <string name="read">Read</string>
 
 </resources>
