@@ -5,6 +5,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.util.Locale;
+import java.util.StringTokenizer;
 
 import com.memetix.mst.language.Language;
 import com.memetix.mst.translate.Translate;
@@ -52,7 +53,7 @@ public class DPfinal extends Activity {
 	public void tryTranslate(View view) {
 	    
 		String toRead = text.getText().toString();  
-	    
+	    toastMsg("Working on your translation...");
 	    if (networkInfo != null && networkInfo.isConnected()) {
 	        new DoTranslate().execute(toRead);
 	    } else {
@@ -64,7 +65,7 @@ public class DPfinal extends Activity {
 	
 	public void tryRead(View view) {
 		String toRead = translated.getText().toString();
-		
+		toastMsg("Working on your audio...");
 		if (networkInfo != null && networkInfo.isConnected()) {
 	        new DoRead().execute(toRead);
 	    } else {
@@ -117,10 +118,10 @@ public class DPfinal extends Activity {
 	         }
 	    }
 	}
-	private class DoRead extends AsyncTask<String, String, String>{
+	private class DoRead extends AsyncTask<String, String, List<Entry>>{
 		
 		@Override
-		protected String doInBackground(String... params) {
+		protected List<Entry> doInBackground(String... params) {
 			// params comes from the execute() call: params[0] is the url.
             try {
                 return goRead(params[0]);
@@ -132,13 +133,13 @@ public class DPfinal extends Activity {
 		
         // onPostExecute displays the results of the AsyncTask.
         @Override
-        protected void onPostExecute(String result) {
+        protected void onPostExecute(List<Entry> result) {
             if (result!=null)
-        	translated.setText(result);
+        	translated.setText(result.get(0).sound.toString());
         }
        
 	     // Do the web service tango here
-        private String goRead(String toRead) throws Exception {
+        private List<Entry> goRead(String toRead) throws Exception {
         	String pre = "http://www.dictionaryapi.com/api/v1/references/collegiate/xml/";
         	String post = "?key=df7d3120-f7c0-4150-bcf4-93e04f72f6db";
 	        URL url = new URL(pre+toRead.toLowerCase(Locale.ENGLISH)+post);
@@ -158,7 +159,7 @@ public class DPfinal extends Activity {
 	             Log.d("Debug", "The response is: " + response);
 	             is = conn.getInputStream();
 	             entries = xmlParser.parse(is);
-	             return entries.get(0).def;
+	             return entries;
 	             // Convert the InputStream into a string
 	             //String contentAsString = readIt(is, len);
 	         // Makes sure that the InputStream is closed after the app is

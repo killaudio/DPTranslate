@@ -2,13 +2,13 @@ package com.pigote.dpfinal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-
-import com.pigote.dpfinal.MWReaderXmlParser.Entry;
 
 import android.util.Xml;
 
@@ -47,10 +47,10 @@ public class MWReaderXmlParser {
     }
     
     public static class Entry {
-        public final String sound;
+        public final URL sound;
         public final String def;
 
-        private Entry(String sound, String def) {
+        private Entry(URL sound, String def) {
             this.sound = sound;
             this.def = def;
         }
@@ -60,7 +60,7 @@ public class MWReaderXmlParser {
     // to their respective "read" methods for processing. Otherwise, skips the tag.
     private Entry readEntry(XmlPullParser parser) throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, ns, "entry");
-        String sound = null;
+        URL sound = null;
         String def = null;
 
         while (parser.next() != XmlPullParser.END_DOCUMENT) {
@@ -69,22 +69,39 @@ public class MWReaderXmlParser {
             }
             String name = parser.getName();
             if (name.equals("sound")) {
-                sound = readSound(parser);
-            } 
-            if (name.equals("def")) {
+                sound = buildSoundURL(readSound(parser));
+                
+            } else if (name.equals("def")) {
                 def = readDef(parser);
             } else {
                 skip(parser);
+            }
+            if(sound!=null && def != null) {
+            	break;
             }
         }
         return new Entry(sound, def);
     }
 
-    // get sound tag in the feed.
+    private URL buildSoundURL(String readSound) throws MalformedURLException {
+		String pre = "http://media.merriam-webster.com/soundc11/";
+		if (readSound.startsWith("bix"))
+    	pre = pre + "bix"  + '/' + readSound;
+		else if (readSound.startsWith("gg"))
+			pre = pre + "gg"  + '/' + readSound;
+		else pre = pre + readSound.toCharArray()[0] + '/' + readSound;
+		
+		URL soundURL = new URL(pre);
+				
+		return soundURL;
+	}
+
+	// get sound tag in the feed.
     private String readSound(XmlPullParser parser) throws IOException, XmlPullParserException {
     	parser.nextTag();
         parser.require(XmlPullParser.START_TAG, ns, "wav");
         String wavFile = readText(parser);
+        parser.next();
         parser.require(XmlPullParser.END_TAG, ns, "wav");
         //parser.nextToken(); TODO hacer pop del parser para que no haga illegal exception en Def
         return wavFile;
@@ -93,9 +110,14 @@ public class MWReaderXmlParser {
     // Processes first definition in the feed.
     private String readDef(XmlPullParser parser) throws IOException, XmlPullParserException {
         String definition = "";
-        parser.nextTag();
+        while (parser.getName() != "dt"){
+        	parser.next();
+        }
         parser.require(XmlPullParser.START_TAG, ns, "dt");
         definition = readText(parser);
+        while (parser.getName() != "dt"){
+        	parser.next();
+        }        
         parser.require(XmlPullParser.END_TAG, ns, "dt");
         return definition;
     }
@@ -105,7 +127,6 @@ public class MWReaderXmlParser {
         String result = "";
         if (parser.next() == XmlPullParser.TEXT) {
             result = parser.getText();
-            parser.nextTag();
         }
         return result;
     }
