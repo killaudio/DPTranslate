@@ -3,6 +3,7 @@ package com.pigote.dpfinal;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
@@ -140,35 +141,39 @@ public class DPfinal extends Activity {
        
 	     // Do the web service tango here
         private List<Entry> goRead(String toRead) throws Exception {
-        	String pre = "http://www.dictionaryapi.com/api/v1/references/collegiate/xml/";
-        	String post = "?key=df7d3120-f7c0-4150-bcf4-93e04f72f6db";
-	        URL url = new URL(pre+toRead.toLowerCase(Locale.ENGLISH)+post);
-	        List<Entry> entries;
+        	
+        	List<Entry> entries = new ArrayList<Entry>();
         	InputStream is = null;
         	MWReaderXmlParser xmlParser = new MWReaderXmlParser();
-
-	         try {
-	             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-	             conn.setReadTimeout(10000 /* milliseconds */);
-	             conn.setConnectTimeout(15000 /* milliseconds */);
-	             conn.setRequestMethod("GET");
-	             conn.setDoInput(true);
-	             // Starts the query
-	             conn.connect();
-	             int response = conn.getResponseCode();
-	             Log.d("Debug", "The response is: " + response);
-	             is = conn.getInputStream();
-	             entries = xmlParser.parse(is);
-	             return entries;
-	             // Convert the InputStream into a string
-	             //String contentAsString = readIt(is, len);
-	         // Makes sure that the InputStream is closed after the app is
-	         // finished using it.
-	         } finally {
-	             if (is != null) {
-	                 is.close();
-	             } 
-	         }	    
+        	
+        	String tokens[] = toRead.split(" ");
+        	String pre = "http://www.dictionaryapi.com/api/v1/references/collegiate/xml/";
+        	String post = "?key=df7d3120-f7c0-4150-bcf4-93e04f72f6db";
+	        	        
+	        for (int i = 0; i<tokens.length; i++){
+	        	try {
+	        		URL url = new URL(pre+tokens[i].toLowerCase(Locale.ENGLISH)+post);
+	        		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+	        		conn.setReadTimeout(10000 /* milliseconds */);
+		            conn.setConnectTimeout(15000 /* milliseconds */);
+		            conn.setRequestMethod("GET");
+		            conn.setDoInput(true);
+		            // Starts the query
+		            conn.connect();
+		            int response = conn.getResponseCode();
+		            Log.d("Debug", "The goRead response is: " + response);
+		            Log.d("Debug", "Trying to get : " + tokens[i].toLowerCase(Locale.ENGLISH));
+		            is = conn.getInputStream();
+		            entries.add(xmlParser.parse(is));
+		            conn.disconnect();
+		            
+		         } finally {
+		             if (is != null) {
+		                 is.close();
+		             } 
+		         }	    	        	
+	        }
+	        return entries;
 	     }
 	}	
 }

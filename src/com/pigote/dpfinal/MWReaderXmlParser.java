@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -15,7 +12,7 @@ import android.util.Xml;
 public class MWReaderXmlParser {
 	private static final String ns = null;
 	   
-    public List<Entry> parse(InputStream in) throws XmlPullParserException, IOException {
+    public Entry parse(InputStream in) throws XmlPullParserException, IOException {
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
@@ -27,9 +24,10 @@ public class MWReaderXmlParser {
         }
     }
     
-    private List<Entry> readFeed(XmlPullParser parser) throws XmlPullParserException, IOException {
-        List<Entry> entries = new ArrayList<Entry>();
-
+    private Entry readFeed(XmlPullParser parser) throws XmlPullParserException, IOException {
+        
+    	Entry myEntry = null;
+    	
         parser.require(XmlPullParser.START_TAG, ns, "entry_list");
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
@@ -38,12 +36,12 @@ public class MWReaderXmlParser {
             String name = parser.getName();
             // Starts by looking for the entry tag
             if (name.equals("entry")) {
-                entries.add(readEntry(parser));
+                myEntry = readEntry(parser);
             } else {
                 skip(parser);
             }
         }  
-        return entries;
+        return myEntry;
     }
     
     public static class Entry {
@@ -103,19 +101,18 @@ public class MWReaderXmlParser {
         String wavFile = readText(parser);
         parser.next();
         parser.require(XmlPullParser.END_TAG, ns, "wav");
-        //parser.nextToken(); TODO hacer pop del parser para que no haga illegal exception en Def
         return wavFile;
     }
       
     // Processes first definition in the feed.
     private String readDef(XmlPullParser parser) throws IOException, XmlPullParserException {
         String definition = "";
-        while (parser.getName() != "dt"){
+        while (!parser.getName().equals("dt")){
         	parser.next();
         }
         parser.require(XmlPullParser.START_TAG, ns, "dt");
         definition = readText(parser);
-        while (parser.getName() != "dt"){
+        while (!parser.getName().equals("dt")){
         	parser.next();
         }        
         parser.require(XmlPullParser.END_TAG, ns, "dt");
