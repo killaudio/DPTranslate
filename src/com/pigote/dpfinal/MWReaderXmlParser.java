@@ -7,6 +7,7 @@ import java.net.URL;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.util.Log;
 import android.util.Xml;
 
 public class MWReaderXmlParser {
@@ -29,7 +30,7 @@ public class MWReaderXmlParser {
     	Entry myEntry = null;
     	
         parser.require(XmlPullParser.START_TAG, ns, "entry_list");
-        while (parser.next() != XmlPullParser.END_TAG) {
+        while (parser.next() != XmlPullParser.END_TAG && myEntry == null) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
             }
@@ -66,10 +67,11 @@ public class MWReaderXmlParser {
                 continue;
             }
             String name = parser.getName();
-            if (name.equals("sound")) {
+            if (name.equals("entry")) {
+                return readEntry(parser);
+            } else if (name.equals("sound")) {
                 sound = buildSoundURL(readSound(parser));
-                
-            } else if (name.equals("def")) {
+            } else if ((sound != null) && name.equals("def")) {
                 def = readDef(parser);
             } else {
                 skip(parser);
@@ -78,6 +80,7 @@ public class MWReaderXmlParser {
             	break;
             }
         }
+        
         return new Entry(sound, def);
     }
 
@@ -106,24 +109,30 @@ public class MWReaderXmlParser {
       
     // Processes first definition in the feed.
     private String readDef(XmlPullParser parser) throws IOException, XmlPullParserException {
-        String definition = "";
-        while (!parser.getName().equals("dt")){
+        String definition = null;
+        while (parser.getEventType() != XmlPullParser.END_DOCUMENT){
+       		if(parser.getEventType() == XmlPullParser.START_TAG)
+       			if (parser.getName().equals("dt"))
+       				break;
         	parser.next();
         }
         parser.require(XmlPullParser.START_TAG, ns, "dt");
         definition = readText(parser);
-        while (!parser.getName().equals("dt")){
-        	parser.next();
-        }        
-        parser.require(XmlPullParser.END_TAG, ns, "dt");
+//        while (!parser.getName().equals("dt")){
+//        	parser.next();
+//        }        
+//        parser.require(XmlPullParser.END_TAG, ns, "dt");
         return definition;
     }
 
      // For the tags sound and readDef, extracts their text values.
     private String readText(XmlPullParser parser) throws IOException, XmlPullParserException {
         String result = "";
-        if (parser.next() == XmlPullParser.TEXT) {
+        if (parser.next() == XmlPullParser.TEXT) { //if text is right after dt tag (<dt>text</dt>)
             result = parser.getText();
+        } else { //if text is formatted after dt tag (<dt><un>text</un></dt>)
+        	parser.next();
+        	result = parser.getText();
         }
         return result;
     }

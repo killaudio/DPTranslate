@@ -6,8 +6,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.StringTokenizer;
-
 import com.memetix.mst.language.Language;
 import com.memetix.mst.translate.Translate;
 import com.pigote.dpfinal.MWReaderXmlParser;
@@ -127,7 +125,8 @@ public class DPfinal extends Activity {
             try {
                 return goRead(params[0]);
             } catch (Exception e) {
-            	toastMsg("Unable to connect to reading service");
+            	//toastMsg("Unable to connect to reading service");
+            	Log.d("myDebug", "goRead Exception! " + e.getMessage());
                 return null;
             }
 		}
@@ -153,6 +152,7 @@ public class DPfinal extends Activity {
 	        for (int i = 0; i<tokens.length; i++){
 	        	try {
 	        		URL url = new URL(pre+tokens[i].toLowerCase(Locale.ENGLISH)+post);
+	        		//URL url = new URL(pre+"the"+post);
 	        		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 	        		conn.setReadTimeout(10000 /* milliseconds */);
 		            conn.setConnectTimeout(15000 /* milliseconds */);
@@ -161,10 +161,13 @@ public class DPfinal extends Activity {
 		            // Starts the query
 		            conn.connect();
 		            int response = conn.getResponseCode();
-		            Log.d("Debug", "The goRead response is: " + response);
-		            Log.d("Debug", "Trying to get : " + tokens[i].toLowerCase(Locale.ENGLISH));
+		            Log.d("myDebug", "Trying to get : " + tokens[i].toLowerCase(Locale.ENGLISH));
+		            if (response==200){
 		            is = conn.getInputStream();
 		            entries.add(xmlParser.parse(is));
+		            } else {
+		            	toastMsg("got error "+response+"!!!");
+		            }
 		            conn.disconnect();
 		            
 		         } finally {
