@@ -24,6 +24,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <provider
+      		android:name=".contentprovider.MyLocalWordDbContentProvider"
+      		android:authorities="com.pigote.dpfinal.contentprovider" >
+   		</provider>
     </application>
 
 </manifest>
