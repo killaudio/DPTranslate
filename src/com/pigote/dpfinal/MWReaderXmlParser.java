@@ -47,10 +47,16 @@ public class MWReaderXmlParser {
     public static class Entry {
         public final URL sound;
         public final String def;
+        public String word;
 
-        private Entry(URL sound, String def) {
+        private Entry(String word, URL sound, String def) {
             this.sound = sound;
             this.def = def;
+            this.word = word;
+        }
+        
+        public void addWord(String word){
+        	this.word = word;
         }
     }
       
@@ -80,7 +86,7 @@ public class MWReaderXmlParser {
             }
         }
         
-        return new Entry(sound, def);
+        return new Entry(" ", sound, def);
     }
 
     private URL buildSoundURL(String readSound) throws MalformedURLException {

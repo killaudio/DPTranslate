@@ -1,5 +1,7 @@
 package com.pigote.dpfinal;
 
+import com.pigote.dpfinal.db.DBHandler;
+
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -11,13 +13,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class DPfinal extends Activity {
+public class DPfinal extends Activity{
 
 	private EditText text;
 	private TextView translated;
 	private ConnectivityManager connMgr;
 	private NetworkInfo networkInfo;
 	private static Activity myActivity;
+	private static DBHandler myDbHandler;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +31,7 @@ public class DPfinal extends Activity {
 	    connMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 	    networkInfo = connMgr.getActiveNetworkInfo();
 	    myActivity = this;
+	    myDbHandler = DBHandler.getInstance(this);
 	}
 
 	@Override
@@ -41,6 +45,11 @@ public class DPfinal extends Activity {
         return myActivity;
 		
     }
+
+	public static DBHandler getDBHandler() {
+        //TODO fix singleton
+		return myDbHandler;
+    }
 	
 	public void tryTranslate(View view) {
 	    
@@ -51,7 +60,6 @@ public class DPfinal extends Activity {
 	    } else {
 	       toastMsg("No network connection available");
 	    }
-	    
 	}
 	
 	public void tryRead(View view) {
