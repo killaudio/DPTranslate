@@ -58,42 +58,41 @@ public class DoRead extends AsyncTask<String, String, String>{
     	final String post = "?key=df7d3120-f7c0-4150-bcf4-93e04f72f6db";
         	        
         for (int i = 0; i<missing.length; i++){
-        	try {
-        		URL url = new URL(pre+missing[i].toLowerCase(Locale.ENGLISH)+post);
-        		//URL url = new URL(pre+"the"+post);
-        		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        		conn.setReadTimeout(10000 /* milliseconds */);
-	            conn.setConnectTimeout(15000 /* milliseconds */);
-	            conn.setRequestMethod("GET");
-	            conn.setDoInput(true);
-	            // Starts the query
-	            conn.connect();
-	            int response = conn.getResponseCode();
-	            Log.d("myDebug", "Trying to get : " + missing[i].toLowerCase(Locale.ENGLISH));
-	            if (response==200){
-	            is = conn.getInputStream();
-	            entries.add(xmlParser.parse(is));
-	            entries.get(i).addWord(missing[i].toLowerCase(Locale.ENGLISH));
-	            } else {
-	            	Activity activity = DPfinal.getActivity();
-	            	translated = (TextView) activity.findViewById(R.id.translatedText);
-	            	translated.setText("Connection error" + response);
-	            }
-	            conn.disconnect();
-	            
-	         } finally {
-	             if (is != null) {
-	                 is.close();
-	             } 
-	         }	    	        	
-        }
+        	if (!missing[i].equals("*")){
+	        	try {
+	        		URL url = new URL(pre+missing[i].toLowerCase(Locale.ENGLISH)+post);
+	        		//URL url = new URL(pre+"the"+post);
+	        		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+	        		conn.setReadTimeout(10000 /* milliseconds */);
+		            conn.setConnectTimeout(15000 /* milliseconds */);
+		            conn.setRequestMethod("GET");
+		            conn.setDoInput(true);
+		            // Starts the query
+		            conn.connect();
+		            int response = conn.getResponseCode();
+		            Log.d("myDebug", "Trying to get : " + missing[i].toLowerCase(Locale.ENGLISH));
+		            if (response==200){
+		            	is = conn.getInputStream();
+			            entries.add(xmlParser.parse(is));
+			            entries.get(i).addWord(missing[i].toLowerCase(Locale.ENGLISH));
+		            } else {
+		            	Activity activity = DPfinal.getActivity();
+		            	translated = (TextView) activity.findViewById(R.id.translatedText);
+		            	translated.setText("Connection error" + response);
+		            }
+		            conn.disconnect();
+		            
+		         } finally {
+		             if (is != null) {
+		                 is.close();
+		             } 
+		         }
+        	}
+        } 
         //go over entries, store in db
        for (int i =0; i<entries.size(); i++){
         	DPfinal.getDBHandler().addEntry(entries.get(i));
-        	//TODO start here tomorrow. getting uri error in sqlite, don't know where to get 
-        	//db file from in blue stacks
         }
-        
         return toRead;
      }
 }

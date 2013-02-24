@@ -90,22 +90,29 @@ public class DBHandler extends SQLiteOpenHelper{
     }
     
    private boolean wordExists(String myWord){
-	   boolean exists = false;
-	   SQLiteDatabase db = this.getReadableDatabase();
-   	
-	   Cursor cursor = db.query(TABLE_DICTIONARY, new String []{ KEY_WORD },
-   							KEY_WORD + "=?", new String[] { myWord }, null, null, null, null);
-	   if (cursor != null)
-		   exists = true;
-	   return exists;
+	    boolean exists = false;
+	    SQLiteDatabase db = this.getReadableDatabase();
+	    String wordToUse = myWord;
+	    //TODO start here, check database when apostrophe is used
+	    if (myWord.contains("'"))
+	    	wordToUse = myWord.replace("'", "\""); 
+	    Cursor cursor;
+	    cursor = db.query(TABLE_DICTIONARY, new String []{ KEY_WORD },
+						KEY_WORD + "=?",new String[] { wordToUse }, 
+						null, null, null, null);
+	    if (cursor.getCount()>0){
+	    	exists = true;
+   		}
+	    return exists;
    }
    
    
     // returns an array of missing words
     public String[] getMissingWords(String words) {
     	String[] myWords = words.split(" ");
+    	
     	for (int i = 0; i<myWords.length; i++){
-    		if (!wordExists(myWords[i]))
+    		if (wordExists(myWords[i]))
     			myWords[i] = "*";  
     	}
     	return myWords;
