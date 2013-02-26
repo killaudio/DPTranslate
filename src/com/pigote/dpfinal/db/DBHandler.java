@@ -1,5 +1,8 @@
 package com.pigote.dpfinal.db;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.pigote.dpfinal.MWReaderXmlParser.Entry;
 
 import android.content.ContentValues;
@@ -92,14 +95,18 @@ public class DBHandler extends SQLiteOpenHelper{
    private boolean wordExists(String myWord){
 	    boolean exists = false;
 	    SQLiteDatabase db = this.getReadableDatabase();
-	    String wordToUse = myWord;
-	    //TODO start here, check database when apostrophe is used
-	    if (myWord.contains("'"))
-	    	wordToUse = myWord.replace("'", "\""); 
 	    Cursor cursor;
-	    cursor = db.query(TABLE_DICTIONARY, new String []{ KEY_WORD },
-						KEY_WORD + "=?",new String[] { wordToUse }, 
+	    //TODO start here, check database when apostrophe is used
+	    if (myWord.contains("'")){
+	    	String[] words = myWord.split("'");
+	    	cursor = db.rawQuery("SELECT " + KEY_WORD + " FROM " + TABLE_DICTIONARY + " WHERE " + KEY_WORD + 
+	    						" LIKE \'" + words[0] + "\'\'" + words[1] + "\'" , null);
+	    } else {
+	    	cursor = db.query(TABLE_DICTIONARY, new String []{ KEY_WORD },
+						KEY_WORD + "=?",new String[] { myWord }, 
 						null, null, null, null);
+	    }
+	    
 	    if (cursor.getCount()>0){
 	    	exists = true;
    		}

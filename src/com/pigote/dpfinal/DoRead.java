@@ -88,10 +88,10 @@ public class DoRead extends AsyncTask<String, String, String>{
 		             } 
 		         }
         	}
-        } 
+        } //TODO check entries DOG, HOT
         //go over entries, store in db
-       for (int i =0; i<entries.size(); i++){
-        	DPfinal.getDBHandler().addEntry(entries.get(i));
+       for (int w =0; w<entries.size(); w++){
+        	DPfinal.getDBHandler().addEntry(entries.get(w));
         }
         return toRead;
      }
