@@ -96,7 +96,6 @@ public class DBHandler extends SQLiteOpenHelper{
 	    boolean exists = false;
 	    SQLiteDatabase db = this.getReadableDatabase();
 	    Cursor cursor;
-	    //TODO start here, check database when apostrophe is used
 	    if (myWord.contains("'")){
 	    	String[] words = myWord.split("'");
 	    	cursor = db.rawQuery("SELECT " + KEY_WORD + " FROM " + TABLE_DICTIONARY + " WHERE " + KEY_WORD + 
