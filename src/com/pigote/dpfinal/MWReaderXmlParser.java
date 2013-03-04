@@ -45,8 +45,8 @@ public class MWReaderXmlParser {
     }
     
     public static class Entry {
-        public final URL sound;
-        public final String def;
+        public URL sound;
+        public String def;
         public String word;
 
         private Entry(String word, URL sound, String def) {
@@ -123,10 +123,8 @@ public class MWReaderXmlParser {
         }
         parser.require(XmlPullParser.START_TAG, ns, "dt");
         definition = readText(parser);
-//        while (!parser.getName().equals("dt")){
-//        	parser.next();
-//        }        
-//        parser.require(XmlPullParser.END_TAG, ns, "dt");
+        if (definition.equals(":"))
+        	return readDef(parser);
         return definition;
     }
 

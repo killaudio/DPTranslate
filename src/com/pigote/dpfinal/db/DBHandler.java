@@ -1,5 +1,6 @@
 package com.pigote.dpfinal.db;
 
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,6 +11,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.net.Uri;
+import android.util.Log;
 
 public class DBHandler extends SQLiteOpenHelper{
 	// Instance
@@ -82,6 +85,27 @@ public class DBHandler extends SQLiteOpenHelper{
     	        cursor.getString(1), cursor.getString(2), cursor.getString(3));
     	// return entry
     	return entry;
+    }
+    
+    public Uri getUri(String myWord){
+    	Uri myUri = null;
+    	SQLiteDatabase db = this.getReadableDatabase();
+	    Cursor cursor;
+	    if (myWord.contains("'")){
+	    	String[] words = myWord.split("'");
+	    	cursor = db.rawQuery("SELECT " + KEY_URI + " FROM " + TABLE_DICTIONARY + " WHERE " + KEY_WORD + 
+	    						" LIKE \'" + words[0] + "\'\'" + words[1] + "\'" , null);
+	    } else {
+	    	cursor = db.query(TABLE_DICTIONARY, new String []{ KEY_URI },
+						KEY_WORD + "=?",new String[] { myWord }, 
+						null, null, null, null);
+	    }
+	    //TODO START HERE get fileloc from cursor, play wav list with intent
+	    //myUri = Uri.parse(cursor.);
+	    if (cursor.getCount()<1){
+	    	Log.d("myDebug", myWord+" DOESN'T EXISTS IN DB!! (DBHandler.getUri)" );
+   		}
+    	return myUri;
     }
      
     // Deleting single word
