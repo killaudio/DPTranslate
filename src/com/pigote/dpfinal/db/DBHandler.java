@@ -96,9 +96,8 @@ public class DBHandler extends SQLiteOpenHelper{
 	    	cursor = db.rawQuery("SELECT " + KEY_URI + " FROM " + TABLE_DICTIONARY + " WHERE " + KEY_WORD + 
 	    						" LIKE \'" + words[0] + "\'\'" + words[1] + "\'" , null);
 	    } else {
-	    	cursor = db.query(TABLE_DICTIONARY, new String []{ KEY_URI },
-						KEY_WORD + "=?",new String[] { myWord }, 
-						null, null, null, null);
+	    	cursor = db.rawQuery("SELECT " + KEY_URI + " FROM " + TABLE_DICTIONARY + " WHERE " + KEY_WORD + 
+					" LIKE \'" + myWord + "\'", null);
 	    }
 	    //TODO START HERE get fileloc from cursor, play wav list with intent
 	    //myUri = Uri.parse(cursor.);
@@ -125,9 +124,8 @@ public class DBHandler extends SQLiteOpenHelper{
 	    	cursor = db.rawQuery("SELECT " + KEY_WORD + " FROM " + TABLE_DICTIONARY + " WHERE " + KEY_WORD + 
 	    						" LIKE \'" + words[0] + "\'\'" + words[1] + "\'" , null);
 	    } else {
-	    	cursor = db.query(TABLE_DICTIONARY, new String []{ KEY_WORD },
-						KEY_WORD + "=?",new String[] { myWord }, 
-						null, null, null, null);
+	    	cursor  = db.rawQuery("SELECT " + KEY_WORD + " FROM " + TABLE_DICTIONARY + " WHERE " + KEY_WORD + 
+					" LIKE \'" + myWord + "\'", null);
 	    }
 	    
 	    if (cursor.getCount()>0){

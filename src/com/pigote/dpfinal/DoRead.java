@@ -48,7 +48,7 @@ public class DoRead extends AsyncTask<String, String, String>{
         	while(i<originalString.length){
         		toPlay.add(DPfinal.getDBHandler().getUri(originalString[i++]));
         	}
-        	Intent intent = new Intent(Intent.ACTION_VIEW, toPlay.get(0)); 
+        	//Intent intent = new Intent(Intent.ACTION_VIEW, toPlay.get(0)); 
         	//TODO START HERE get fileloc from cursor, play wav list with intent
         	//startActivity(intent);
         	Activity activity = DPfinal.getActivity();
@@ -85,9 +85,9 @@ public class DoRead extends AsyncTask<String, String, String>{
 		            Log.d("myDebug", "Trying to get : " + missing[i].toLowerCase(Locale.ENGLISH));
 		            if (response==200){
 		            	is = conn.getInputStream();
-			            entries.add(xmlParser.parse(is));
-			            entries.get(i).addWord(missing[i].toLowerCase(Locale.ENGLISH));
-			            storeWavToExternal(entries.get(i));
+		            	entries.add(xmlParser.parse(is));
+			            entries.get(entries.size()-1).addWord(missing[i].toLowerCase(Locale.ENGLISH));
+			            storeWavToExternal(entries.get(entries.size()-1));
 		            } else {
 		            	Activity activity = DPfinal.getActivity();
 		            	translated = (TextView) activity.findViewById(R.id.translatedText);
