@@ -12,8 +12,7 @@ import java.util.List;
 import java.util.Locale;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.net.Uri;
+import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.TextView;
@@ -25,10 +24,12 @@ public class DoRead extends AsyncTask<String, String, String>{
 	private TextView translated;
 	private List<Entry> entries = new ArrayList<Entry>();
 	private String[] originalString;
+  
 	@Override
 	protected String doInBackground(String... params) {
 		// params comes from the execute() call: params[0] is the url.
-        try {
+    
+	    try {
             return goRead(params[0]);
         } catch (Exception e) {
         	//toastMsg("Unable to connect to reading service");
@@ -40,20 +41,21 @@ public class DoRead extends AsyncTask<String, String, String>{
     // onPostExecute displays the results of the AsyncTask.
     @Override
     protected void onPostExecute(String result) {
+    	MediaPlayer mp = null;
+    	// see http://androidsnippets.com/playing-sound-effect-using-mediaplayer
         if (result!=null){
         	//make array from db of audio files in local storage
-        	//play file array
         	int i = 0;
-        	List<Uri> toPlay = new ArrayList<Uri>();
+        	Log.d("myDebug", "Your sound should be playing now");
         	while(i<originalString.length){
-        		toPlay.add(DPfinal.getDBHandler().getUri(originalString[i++]));
+        		//load the wav file to soundPool
+        		mp = MediaPlayer.create(DPfinal.getActivity(), DPfinal.getDBHandler().getUri(originalString[i++]));
+        		mp.start();
+        		while (mp.isPlaying()){//Create a listener player so we can play in sequence with On...stuff	
+        			//TODO here
+        		}
+        		mp.release();
         	}
-        	//Intent intent = new Intent(Intent.ACTION_VIEW, toPlay.get(0)); 
-        	//TODO START HERE get fileloc from cursor, play wav list with intent
-        	//startActivity(intent);
-        	Activity activity = DPfinal.getActivity();
-        	translated = (TextView) activity.findViewById(R.id.translatedText);
-        	translated.setText("Array played");
         }
     }
    
@@ -68,7 +70,7 @@ public class DoRead extends AsyncTask<String, String, String>{
     	
     	final String pre = "http://www.dictionaryapi.com/api/v1/references/collegiate/xml/";
     	final String post = "?key=df7d3120-f7c0-4150-bcf4-93e04f72f6db";
-        	        
+        	       
         for (int i = 0; i<missing.length; i++){
         	if (!missing[i].equals("*")){
 	        	try {

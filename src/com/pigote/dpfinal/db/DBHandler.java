@@ -1,9 +1,5 @@
 package com.pigote.dpfinal.db;
 
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.pigote.dpfinal.MWReaderXmlParser.Entry;
 
 import android.content.ContentValues;
@@ -89,6 +85,7 @@ public class DBHandler extends SQLiteOpenHelper{
     
     public Uri getUri(String myWord){
     	Uri myUri = null;
+    	String stringToFixUri;
     	SQLiteDatabase db = this.getReadableDatabase();
 	    Cursor cursor;
 	    if (myWord.contains("'")){
@@ -99,8 +96,10 @@ public class DBHandler extends SQLiteOpenHelper{
 	    	cursor = db.rawQuery("SELECT " + KEY_URI + " FROM " + TABLE_DICTIONARY + " WHERE " + KEY_WORD + 
 					" LIKE \'" + myWord + "\'", null);
 	    }
-	    //TODO START HERE get fileloc from cursor, play wav list with intent
-	    //myUri = Uri.parse(cursor.);
+
+	    cursor.moveToFirst();
+	    stringToFixUri = cursor.getString(0);
+	    myUri = Uri.parse(stringToFixUri.substring(5));
 	    if (cursor.getCount()<1){
 	    	Log.d("myDebug", myWord+" DOESN'T EXISTS IN DB!! (DBHandler.getUri)" );
    		}
