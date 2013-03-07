@@ -2,9 +2,12 @@ package com.pigote.dpfinal;
 
 import com.pigote.dpfinal.db.DBHandler;
 
+import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.app.Activity;
 import android.content.Context;
 import android.view.Menu;
@@ -13,7 +16,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class DPfinal extends Activity{
+public class DPfinal extends Activity implements OnReadCompleted{
 
 	private EditText text;
 	private TextView translated;
@@ -21,6 +24,9 @@ public class DPfinal extends Activity{
 	private NetworkInfo networkInfo;
 	private static Activity myActivity;
 	private static DBHandler myDbHandler;
+	private String[] originalString;
+	private MediaPlayer mp;
+	private Handler handler;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -64,9 +70,10 @@ public class DPfinal extends Activity{
 	
 	public void tryRead(View view) {
 		String toRead = translated.getText().toString();
+		originalString = toRead.split(" "); 
 		toastMsg("Working on your audio...");
 		if (networkInfo != null && networkInfo.isConnected()) {
-	        new DoRead().execute(toRead);
+	        new DoRead(this).execute(toRead);
 	    } else {
 	       toastMsg("No network connection available");
 	    }
@@ -77,5 +84,28 @@ public class DPfinal extends Activity{
 		int duration = Toast.LENGTH_SHORT;
 		Toast toast = Toast.makeText(context, string, duration);
 		toast.show();
+	}
+
+	@Override
+	public void onReadCompleted() {
+		if (originalString.length>0)
+		playNext(DPfinal.getActivity(), DPfinal.getDBHandler().getUri(originalString[0]), 1);
+	}
+
+	private void playNext(Activity activity, Uri uri, int i) {
+		final int w = i;
+		handler = new Handler();
+		mp = MediaPlayer.create(activity, uri);
+		//TODO check why sometimes it sends null pointer exception here. example words: back, am
+		mp.start();
+		handler.postDelayed(new Runnable() {
+
+			@Override
+			public void run() {
+				mp.release();
+				if (w<originalString.length)
+				playNext(DPfinal.getActivity(), DPfinal.getDBHandler().getUri(originalString[w]), w+1);
+			}}, mp.getDuration() + 500);
+		
 	}
 }

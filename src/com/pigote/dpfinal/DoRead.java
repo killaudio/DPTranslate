@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Locale;
 
 import android.app.Activity;
-import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.TextView;
@@ -20,11 +19,14 @@ import android.widget.TextView;
 import com.pigote.dpfinal.MWReaderXmlParser.Entry;
 
 public class DoRead extends AsyncTask<String, String, String>{
-	
+	private OnReadCompleted listener;
 	private TextView translated;
 	private List<Entry> entries = new ArrayList<Entry>();
-	private String[] originalString;
-  
+	
+	public DoRead(OnReadCompleted listener){
+		this.listener = listener;
+	}
+	
 	@Override
 	protected String doInBackground(String... params) {
 		// params comes from the execute() call: params[0] is the url.
@@ -41,27 +43,15 @@ public class DoRead extends AsyncTask<String, String, String>{
     // onPostExecute displays the results of the AsyncTask.
     @Override
     protected void onPostExecute(String result) {
-    	MediaPlayer mp = null;
-    	// see http://androidsnippets.com/playing-sound-effect-using-mediaplayer
         if (result!=null){
-        	//make array from db of audio files in local storage
-        	int i = 0;
-        	Log.d("myDebug", "Your sound should be playing now");
-        	while(i<originalString.length){
-        		//load the wav file to soundPool
-        		mp = MediaPlayer.create(DPfinal.getActivity(), DPfinal.getDBHandler().getUri(originalString[i++]));
-        		mp.start();
-        		while (mp.isPlaying()){//Create a listener player so we can play in sequence with On...stuff	
-        			//TODO here
-        		}
-        		mp.release();
+        	Log.d("myDebug", "Entry list ready to play");
+        	listener.onReadCompleted();
         	}
-        }
     }
    
      // Do the web service tango here
     private String goRead(String toRead) throws Exception {
-    	originalString = toRead.split(" ");
+    	toRead.split(" ");
     	// Query local db, fill array of missing words
     	String[] missing = DPfinal.getDBHandler().getMissingWords(toRead);
     	// go online, find missing words and add to db
@@ -128,8 +118,7 @@ public class DoRead extends AsyncTask<String, String, String>{
 	        urlConnection.connect();
 
 	        //set the path where we want to save the file
-	        //in this case, going to save it on the root directory of the
-	        //sd card.
+	        //in this case, going to save it to a dir called wavs
 	        File SDCardDir = DPfinal.getActivity().getExternalFilesDir("wavs");
 	        
 	        //check that SDCardDir is not null (we have SDCard!!)
