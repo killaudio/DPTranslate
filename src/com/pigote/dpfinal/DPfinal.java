@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.view.Menu;
 import android.view.View;
 import android.widget.EditText;
@@ -18,6 +19,8 @@ import android.widget.Toast;
 
 public class DPfinal extends Activity implements OnReadCompleted{
 
+	public final static String EXTRA_MESSAGE = "com.pigote.dpfinal.MESSAGE";
+	
 	private EditText text;
 	private TextView translated;
 	private ConnectivityManager connMgr;
@@ -58,7 +61,13 @@ public class DPfinal extends Activity implements OnReadCompleted{
     }
 	
 	public void tryTranslate(View view) {
-	    
+	    //TODO hide keyboard if showing
+		translated.setOnClickListener(new View.OnClickListener() {
+	    	  @Override
+	    	  public void onClick(View v) {
+	    	    startSentenceActivity(v);
+	    	  }
+	    	});
 		String toRead = text.getText().toString();  
 	    toastMsg("Working on your translation...");
 	    if (networkInfo != null && networkInfo.isConnected()) {
@@ -69,6 +78,7 @@ public class DPfinal extends Activity implements OnReadCompleted{
 	}
 	
 	public void tryRead(View view) {
+		
 		String toRead = translated.getText().toString();
 		originalString = toRead.split(" "); 
 		toastMsg("Working on your audio...");
@@ -96,7 +106,8 @@ public class DPfinal extends Activity implements OnReadCompleted{
 		final int w = i;
 		handler = new Handler();
 		mp = MediaPlayer.create(activity, uri);
-		//TODO check why sometimes it sends null pointer exception here. example words: back, am
+		//MediaPlayer.create sometimes returns null because
+		//the file uses WAVE 8,000Hz MP3 8 kbit/s format, while android 2.3.3 supports only 8- and 16-bit linear PCM
 		mp.start();
 		handler.postDelayed(new Runnable() {
 
@@ -105,7 +116,14 @@ public class DPfinal extends Activity implements OnReadCompleted{
 				mp.release();
 				if (w<originalString.length)
 				playNext(DPfinal.getActivity(), DPfinal.getDBHandler().getUri(originalString[w]), w+1);
-			}}, mp.getDuration() + 500);
+			}}, mp.getDuration() + 100);
 		
+	}
+	
+	public void startSentenceActivity(View view){
+		Intent intent = new Intent(this, SentenceActivity.class);
+		String message = translated.getText().toString();
+		intent.putExtra(EXTRA_MESSAGE, message);
+		startActivity(intent);
 	}
 }

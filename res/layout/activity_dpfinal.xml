@@ -49,6 +49,7 @@
         android:layout_alignLeft="@+id/textToTranslate"
         android:layout_below="@+id/textView2"
         android:layout_marginTop="21dp"
+        android:textIsSelectable="true"
         android:hint="@string/hintDummy" />
 
     <Button
