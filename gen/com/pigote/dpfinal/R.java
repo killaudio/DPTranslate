@@ -24,22 +24,23 @@ public final class R {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int action_settings=0x7f08000a;
-        public static final int end_data_send_button=0x7f080008;
+        public static final int action_settings=0x7f08000b;
+        public static final int definition=0x7f080008;
         public static final int go=0x7f080000;
-        public static final int menu_settings=0x7f080009;
-        public static final int popup_element=0x7f080006;
+        public static final int menu_settings=0x7f08000a;
+        public static final int myRelativeLayout=0x7f080006;
+        public static final int ok=0x7f080009;
         public static final int read=0x7f080005;
-        public static final int server_status_text=0x7f080007;
         public static final int textToTranslate=0x7f080001;
         public static final int textView2=0x7f080003;
         public static final int title=0x7f080002;
         public static final int translatedText=0x7f080004;
+        public static final int word=0x7f080007;
     }
     public static final class layout {
         public static final int activity_dpfinal=0x7f030000;
         public static final int activity_sentence=0x7f030001;
-        public static final int popup_entry=0x7f030002;
+        public static final int popup_word=0x7f030002;
     }
     public static final class menu {
         public static final int activity_dpfinal=0x7f070000;

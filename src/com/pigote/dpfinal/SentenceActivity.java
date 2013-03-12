@@ -2,6 +2,7 @@ package com.pigote.dpfinal;
 
 import android.os.Bundle;
 import android.app.ListActivity;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -13,7 +14,6 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.support.v4.app.NavUtils;
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -67,34 +67,39 @@ public class SentenceActivity extends ListActivity {
 	
 	@Override
 	  protected void onListItemClick(ListView l, View v, int position, long id) {
-	    //String item = (String) getListAdapter().getItem(position);
+	    String item = (String) getListAdapter().getItem(position);
 	    //Toast.makeText(this, item + " selected", Toast.LENGTH_LONG).show();
-		initiatePopupWindow();
+		initiatePopupWindow(item);
 	  }
 	//TODO launch PopupWindow!!!
-	private void initiatePopupWindow() {
+	private void initiatePopupWindow(String s) {
 	    try {
 	        //We need to get the instance of the LayoutInflater, use the context of this activity
 	        LayoutInflater inflater = (LayoutInflater) SentenceActivity.this
 	                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	        //Inflate the view from a predefined XML layout
-	        View layout = inflater.inflate(R.layout.popup_entry,
-	                (ViewGroup) findViewById(R.id.popup_element));
+	        View layout = inflater.inflate(R.layout.popup_word, (ViewGroup) findViewById(R.id.myRelativeLayout));
 	        // create a 300px width and 470px height PopupWindow
 	        pw = new PopupWindow(layout, 300, 470, true);
 	        // display the popup in the center
 	        pw.showAtLocation(layout, Gravity.CENTER, 0, 0);
 	 
-	        TextView mResultText = (TextView) layout.findViewById(R.id.server_status_text);
-	        Button playButton = (Button) layout.findViewById(R.id.end_data_send_button);
-	        playButton.setOnClickListener(play_button_click_listener);
+	        TextView wordText = (TextView) layout.findViewById(R.id.word);
+	        wordText.setText(s);
+	        
+	        TextView definitionText = (TextView) layout.findViewById(R.id.definition);
+	        definitionText.setText(DPfinal.getDBHandler().getDefinition(s).toString());
+	        
+	        Button okButton = (Button) layout.findViewById(R.id.ok);
+	        okButton.setOnClickListener(ok_button_click_listener);
 	 
 	    } catch (Exception e) {
+	    	Log.d("myDebug", "initiatePopUpExec!" + e.toString());
 	        e.printStackTrace();
 	    }
 	}
 	 
-	private OnClickListener play_button_click_listener = new OnClickListener() {
+	private OnClickListener ok_button_click_listener = new OnClickListener() {
 	    public void onClick(View v) {
 	        pw.dismiss();
 	    }

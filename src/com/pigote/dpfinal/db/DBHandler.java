@@ -105,7 +105,25 @@ public class DBHandler extends SQLiteOpenHelper{
    		}
     	return myUri;
     }
-     
+
+	public String getDefinition(String s) {
+		Cursor cursor;
+		SQLiteDatabase db = this.getReadableDatabase();
+		if (s.contains("'")){
+			String[] words = s.split("'");
+		    cursor = db.rawQuery("SELECT " + KEY_DEFINITION + " FROM " + TABLE_DICTIONARY + " WHERE " + KEY_WORD + 
+		    					" LIKE \'" + words[0] + "\'\'" + words[1] + "\'" , null);
+		} else {
+		    cursor = db.rawQuery("SELECT " + KEY_DEFINITION + " FROM " + TABLE_DICTIONARY + " WHERE " + KEY_WORD + 
+								" LIKE \'" + s + "\'", null);
+		}
+		cursor.moveToFirst();
+		if (cursor.getCount()<1){
+	    	Log.d("myDebug", s+" DOESN'T EXISTS IN DB!! (DBHandler.getUri)" );
+   		}
+		return cursor.getString(0);
+	}
+    
     // Deleting single word
     public void deleteWord(WordDbTableEntry entry) {
     	SQLiteDatabase db = this.getWritableDatabase();
@@ -152,4 +170,5 @@ public class DBHandler extends SQLiteOpenHelper{
         return INSTANCE;
     	else return new DBHandler(context);
     }
+
 }
