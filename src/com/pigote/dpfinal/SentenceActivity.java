@@ -9,6 +9,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -79,11 +80,11 @@ public class SentenceActivity extends ListActivity {
 	                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	        //Inflate the view from a predefined XML layout
 	        View layout = inflater.inflate(R.layout.popup_word, (ViewGroup) findViewById(R.id.myRelativeLayout));
-	        // create a 300px width and 470px height PopupWindow
-	        pw = new PopupWindow(layout, 300, 470, true);
-	        // display the popup in the center
+
+	        pw = new PopupWindow(layout, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, true);
+	        
 	        pw.showAtLocation(layout, Gravity.CENTER, 0, 0);
-	 
+	        
 	        TextView wordText = (TextView) layout.findViewById(R.id.word);
 	        wordText.setText(s);
 	        
