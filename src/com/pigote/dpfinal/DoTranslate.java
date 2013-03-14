@@ -12,6 +12,7 @@ import android.widget.TextView;
 public class DoTranslate extends AsyncTask<String, String, String>{
 	
 	private TextView translated;
+	private OnTranslateCompleted listener;
 	
 	@Override
 	protected String doInBackground(String... params) {
@@ -26,10 +27,15 @@ public class DoTranslate extends AsyncTask<String, String, String>{
     // onPostExecute displays the results of the AsyncTask.
     @Override
     protected void onPostExecute(String result) {
-        Activity activity = DPfinal.getActivity();
+    	Activity activity = DPfinal.getActivity();
         translated = (TextView) activity.findViewById(R.id.translatedText);
     	translated.setText(result);
+    	listener.onTranslatedCompleted();
     }
+    
+    public DoTranslate(OnTranslateCompleted listener){
+		this.listener = listener;
+	}
    
      // Do the web service tango here
     private String goTranslate(String myText) throws Exception {

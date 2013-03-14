@@ -1,5 +1,5 @@
 package com.pigote.dpfinal;
 
-public interface OnReadCompleted {
+public interface OnDBUpdateCompleted {
 	void onReadCompleted();
 }

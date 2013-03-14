@@ -17,9 +17,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class DPfinal extends Activity implements OnReadCompleted{
+public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslateCompleted{
 
 	public final static String EXTRA_MESSAGE = "com.pigote.dpfinal.MESSAGE";
+	public final static String EXTRA_WORDS = "com.pigote.dpfinal.WORDS";
 	
 	private EditText text;
 	private TextView translated;
@@ -62,6 +63,7 @@ public class DPfinal extends Activity implements OnReadCompleted{
 	
 	public void tryTranslate(View view) {
 	    //TODO hide keyboard if showing
+		//make textview clickable
 		translated.setOnClickListener(new View.OnClickListener() {
 	    	  @Override
 	    	  public void onClick(View v) {
@@ -71,22 +73,15 @@ public class DPfinal extends Activity implements OnReadCompleted{
 		String toRead = text.getText().toString();  
 	    toastMsg("Working on your translation...");
 	    if (networkInfo != null && networkInfo.isConnected()) {
-	        new DoTranslate().execute(toRead);
+	        new DoTranslate(this).execute(toRead);
 	    } else {
 	       toastMsg("No network connection available");
 	    }
 	}
 	
 	public void tryRead(View view) {
-		
-		String toRead = translated.getText().toString();
-		originalString = toRead.split(" "); 
-		toastMsg("Working on your audio...");
-		if (networkInfo != null && networkInfo.isConnected()) {
-	        new DoRead(this).execute(toRead);
-	    } else {
-	       toastMsg("No network connection available");
-	    }
+		if (originalString.length>0)
+			playNext(DPfinal.getActivity(), DPfinal.getDBHandler().getUri(originalString[0]), 1);
 	}
 	
 	public void toastMsg(String string) {
@@ -98,8 +93,7 @@ public class DPfinal extends Activity implements OnReadCompleted{
 
 	@Override
 	public void onReadCompleted() {
-		if (originalString.length>0)
-		playNext(DPfinal.getActivity(), DPfinal.getDBHandler().getUri(originalString[0]), 1);
+		 toastMsg("db updated");
 	}
 
 	private void playNext(Activity activity, Uri uri, int i) {
@@ -125,5 +119,23 @@ public class DPfinal extends Activity implements OnReadCompleted{
 		String message = translated.getText().toString();
 		intent.putExtra(EXTRA_MESSAGE, message);
 		startActivity(intent);
+	}
+
+	@Override
+	public void onTranslatedCompleted() {
+		String toRead = translated.getText().toString();
+		originalString = toRead.split(" "); 
+		String[] missing = DPfinal.getDBHandler().getMissingWords(toRead);
+		for (int i = 0; i<missing.length; i++){
+        	if (!missing[i].equals("*")){
+        		toastMsg("updating online db...");
+        		if (networkInfo != null && networkInfo.isConnected()) {
+        	        new UpdateDb(this).execute(toRead);
+        	    } else {
+        	       toastMsg("No network connection available");
+        	    }
+        		break;
+        	}
+		}
 	}
 }

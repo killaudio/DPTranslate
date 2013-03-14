@@ -1,6 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/myRelativeLayout"
+    android:id="@+id/AWmyRelativeLayout"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="#bebebe"
@@ -8,39 +8,29 @@
     
    
     <TextView
-        android:id="@+id/word"
+        android:id="@+id/AWword"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toStartOf="@+id/myRelativeLayout"
+        android:layout_toStartOf="@+id/AWmyRelativeLayout"
         android:layout_centerHorizontal="true"
         />
 
-    <TextView
-        android:id="@+id/definition"
+    <EditText
+        android:id="@+id/AWdefinition"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/word"
+        android:layout_below="@+id/AWword"
+        android:hint="Enter new definition"
         />
     
     <Button
-        android:id="@+id/ok"
+        android:id="@+id/AWadd"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/definition"
-        android:text="OK"
+        android:layout_below="@+id/AWdefinition"
+        android:text="Add Definition"
         android:layout_centerHorizontal="true"
-        android:onClick="tryClose" 
+        android:onClick="tryAdd" 
         />
-    
-    <Button
-        android:id="@+id/play"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/ok"
-        android:text="play"
-        android:onClick="tryPlay"
-        android:layout_centerHorizontal="true"
-        /> 
-    
 
 </RelativeLayout>

@@ -1,5 +1,7 @@
 package com.pigote.dpfinal;
 
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.app.ListActivity;
 import android.util.Log;
@@ -7,11 +9,10 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -24,6 +25,7 @@ import android.os.Build;
 public class SentenceActivity extends ListActivity {
 
 	private PopupWindow pw;
+	private String currentWord;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +39,7 @@ public class SentenceActivity extends ListActivity {
 	    ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
 	            android.R.layout.simple_list_item_1, values);
 	    setListAdapter(adapter);
+
 	}
 
 	/**
@@ -69,41 +72,77 @@ public class SentenceActivity extends ListActivity {
 	@Override
 	  protected void onListItemClick(ListView l, View v, int position, long id) {
 	    String item = (String) getListAdapter().getItem(position);
-	    //Toast.makeText(this, item + " selected", Toast.LENGTH_LONG).show();
 		initiatePopupWindow(item);
 	  }
-	//TODO launch PopupWindow!!!
-	private void initiatePopupWindow(String s) {
-	    try {
-	        //We need to get the instance of the LayoutInflater, use the context of this activity
-	        LayoutInflater inflater = (LayoutInflater) SentenceActivity.this
-	                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	        //Inflate the view from a predefined XML layout
-	        View layout = inflater.inflate(R.layout.popup_word, (ViewGroup) findViewById(R.id.myRelativeLayout));
 
-	        pw = new PopupWindow(layout, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, true);
-	        
-	        pw.showAtLocation(layout, Gravity.CENTER, 0, 0);
-	        
-	        TextView wordText = (TextView) layout.findViewById(R.id.word);
-	        wordText.setText(s);
-	        
-	        TextView definitionText = (TextView) layout.findViewById(R.id.definition);
-	        definitionText.setText(DPfinal.getDBHandler().getDefinition(s).toString());
-	        
-	        Button okButton = (Button) layout.findViewById(R.id.ok);
-	        okButton.setOnClickListener(ok_button_click_listener);
-	 
-	    } catch (Exception e) {
-	    	Log.d("myDebug", "initiatePopUpExec!" + e.toString());
-	        e.printStackTrace();
-	    }
+	private void initiatePopupWindow(String s) {
+		//TODO start here: woman returns not in database when querying a second time with inexistent word "woman" then "woman piriguete" 
+		String tmpDef = DPfinal.getDBHandler().getDefinition(s);
+        currentWord = s;
+		if (tmpDef == null){
+        	//add new Word definition
+        	try {
+		        //We need to get the instance of the LayoutInflater, use the context of this activity
+		        LayoutInflater inflater = (LayoutInflater) SentenceActivity.this
+		                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		        //Inflate the view from a predefined XML layout
+		        View layout = inflater.inflate(R.layout.popup_addword, (ViewGroup) findViewById(R.id.AWmyRelativeLayout));
+
+		        pw = new PopupWindow(layout, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, true);
+		        
+		        pw.showAtLocation(layout, Gravity.CENTER, 0, 0);
+		        
+		        TextView wordText = (TextView) layout.findViewById(R.id.AWword);
+		        wordText.setText(s);
+		        
+		    } catch (Exception e) {
+		    	Log.d("myDebug", "initiatePopUpExec!" + e.toString());
+		        e.printStackTrace();
+		    }
+        } else {
+        	//word already exists in db with def
+			try {
+		        //We need to get the instance of the LayoutInflater, use the context of this activity
+		        LayoutInflater inflater = (LayoutInflater) SentenceActivity.this
+		                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		        //Inflate the view from a predefined XML layout
+		        View layout = inflater.inflate(R.layout.popup_word, (ViewGroup) findViewById(R.id.myRelativeLayout));
+
+		        pw = new PopupWindow(layout, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, true);
+		        
+		        pw.showAtLocation(layout, Gravity.CENTER, 0, 0);
+		        
+		        TextView wordText = (TextView) layout.findViewById(R.id.word);
+		        wordText.setText(s);
+		        
+		        TextView definitionText = (TextView) layout.findViewById(R.id.definition);
+		        definitionText.setText(tmpDef);
+		        
+		    } catch (Exception e) {
+		    	Log.d("myDebug", "initiatePopUpExec!" + e.toString());
+		        e.printStackTrace();
+		    }
+        }
 	}
 	 
-	private OnClickListener ok_button_click_listener = new OnClickListener() {
-	    public void onClick(View v) {
-	        pw.dismiss();
-	    }
-	};
+	public void tryClose(View v) {
+	    pw.dismiss();
+	}
+	
+	public void tryPlay(View v) {
+	 	playWord();
+	}
 
+	public void tryAdd(View v){
+		EditText defText = (EditText) v.findViewById(R.id.AWdefinition);
+		DPfinal.getDBHandler().addDefinition(currentWord, defText.getText().toString());
+		pw.dismiss();
+	}
+	
+	protected void playWord() {
+		MediaPlayer mp = MediaPlayer.create(this, DPfinal.getDBHandler().getUri(currentWord));
+		//MediaPlayer.create sometimes returns null because
+		//the file uses WAVE 8,000Hz MP3 8 kbit/s format, while android 2.3.3 supports only 8- and 16-bit linear PCM
+		mp.start();
+	}
 }

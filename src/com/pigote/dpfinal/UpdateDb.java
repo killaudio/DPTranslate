@@ -18,12 +18,13 @@ import android.widget.TextView;
 
 import com.pigote.dpfinal.MWReaderXmlParser.Entry;
 
-public class DoRead extends AsyncTask<String, String, String>{
-	private OnReadCompleted listener;
+public class UpdateDb extends AsyncTask<String, String, String>{
+	
+	private OnDBUpdateCompleted listener;
 	private TextView translated;
 	private List<Entry> entries = new ArrayList<Entry>();
-	
-	public DoRead(OnReadCompleted listener){
+		
+	public UpdateDb(OnDBUpdateCompleted listener){
 		this.listener = listener;
 	}
 	
@@ -34,7 +35,6 @@ public class DoRead extends AsyncTask<String, String, String>{
 	    try {
             return goRead(params[0]);
         } catch (Exception e) {
-        	//toastMsg("Unable to connect to reading service");
         	Log.d("myDebug", "goRead Exception! " + e.getMessage());
             return null;
         }
@@ -46,12 +46,11 @@ public class DoRead extends AsyncTask<String, String, String>{
         if (result!=null){
         	Log.d("myDebug", "Entry list ready to play");
         	listener.onReadCompleted();
-        	}
+        }
     }
    
      // Do the web service tango here
     private String goRead(String toRead) throws Exception {
-    	toRead.split(" ");
     	// Query local db, fill array of missing words
     	String[] missing = DPfinal.getDBHandler().getMissingWords(toRead);
     	// go online, find missing words and add to db

@@ -29,6 +29,7 @@ public class DBHandler extends SQLiteOpenHelper{
     private static final String KEY_WORD = "word";
     private static final String KEY_DEFINITION = "definition";
     private static final String KEY_URI = "fileloc";
+    
  
     protected DBHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -67,22 +68,6 @@ public class DBHandler extends SQLiteOpenHelper{
     	db.close(); // Closing database connection
     }
      
-    // Getting single entry
-    public WordDbTableEntry getEntry(int id) {
-    	SQLiteDatabase db = this.getReadableDatabase();
-    	 
-    	Cursor cursor = db.query(TABLE_DICTIONARY, new String[] { KEY_ID,
-    	        KEY_WORD, KEY_DEFINITION, KEY_URI }, KEY_ID + "=?",
-    	        new String[] { String.valueOf(id) }, null, null, null, null);
-    	if (cursor != null)
-    	    cursor.moveToFirst();
-    	 
-    	WordDbTableEntry entry = new WordDbTableEntry(Integer.parseInt(cursor.getString(0)),
-    	        cursor.getString(1), cursor.getString(2), cursor.getString(3));
-    	// return entry
-    	return entry;
-    }
-    
     public Uri getUri(String myWord){
     	Uri myUri = null;
     	String stringToFixUri;
@@ -102,11 +87,13 @@ public class DBHandler extends SQLiteOpenHelper{
 	    myUri = Uri.parse(stringToFixUri.substring(5));
 	    if (cursor.getCount()<1){
 	    	Log.d("myDebug", myWord+" DOESN'T EXISTS IN DB!! (DBHandler.getUri)" );
+	    	
    		}
     	return myUri;
     }
 
 	public String getDefinition(String s) {
+		String def = null;
 		Cursor cursor;
 		SQLiteDatabase db = this.getReadableDatabase();
 		if (s.contains("'")){
@@ -120,17 +107,11 @@ public class DBHandler extends SQLiteOpenHelper{
 		cursor.moveToFirst();
 		if (cursor.getCount()<1){
 	    	Log.d("myDebug", s+" DOESN'T EXISTS IN DB!! (DBHandler.getUri)" );
+   		} else {
+   			def = cursor.getString(0);
    		}
-		return cursor.getString(0);
+		return def;
 	}
-    
-    // Deleting single word
-    public void deleteWord(WordDbTableEntry entry) {
-    	SQLiteDatabase db = this.getWritableDatabase();
-   	    db.delete(TABLE_DICTIONARY, KEY_ID + " = ?",
-   	            new String[] { String.valueOf(entry.getID()) });
-   	    db.close();    	
-    }
     
    private boolean wordExists(String myWord){
 	    boolean exists = false;
@@ -161,7 +142,7 @@ public class DBHandler extends SQLiteOpenHelper{
     			myWords[i] = "*";  
     	}
     	return myWords;
-    }  
+    }
     
     //getters for singleton
     public static synchronized DBHandler getInstance(Context context)
@@ -170,5 +151,19 @@ public class DBHandler extends SQLiteOpenHelper{
         return INSTANCE;
     	else return new DBHandler(context);
     }
+
+	public void addDefinition(String currentWord, String string) {
+		SQLiteDatabase db = this.getWritableDatabase();
+   	 
+    	ContentValues values = new ContentValues();
+    	values.put(KEY_WORD, currentWord); 
+    	values.put(KEY_DEFINITION, string);
+    	values.put(KEY_URI, " "); 
+    	 
+    	// Inserting Row
+    	db.insert(TABLE_DICTIONARY, null, values);
+    	db.close(); // Closing database connection
+		
+	}
 
 }
