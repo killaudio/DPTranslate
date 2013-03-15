@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.view.Menu;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +26,7 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 	private EditText text;
 	private TextView translated;
 	private ConnectivityManager connMgr;
+	private Button readButton;
 	private NetworkInfo networkInfo;
 	private static Activity myActivity;
 	private static DBHandler myDbHandler;
@@ -38,6 +40,7 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 		setContentView(R.layout.activity_dpfinal);
 		text = (EditText) findViewById(R.id.textToTranslate);
 	    translated = (TextView) findViewById(R.id.translatedText);
+	    readButton = (Button) findViewById(R.id.read);
 	    connMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 	    networkInfo = connMgr.getActiveNetworkInfo();
 	    myActivity = this;
@@ -49,6 +52,31 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.activity_dpfinal, menu);
 		return true;
+	}
+
+	@Override
+	public void onTranslatedCompleted() {
+		String toRead = translated.getText().toString();
+		originalString = toRead.split(" "); 
+		String[] missing = DPfinal.getDBHandler().getMissingWords(toRead);
+		for (int i = 0; i<missing.length; i++){
+        	if (!missing[i].equals("*")){
+        		toastMsg("updating online db...");
+        		if (networkInfo != null && networkInfo.isConnected()) {
+        	        new UpdateDb(this).execute(toRead);
+        	    } else {
+        	       toastMsg("No network connection available");
+        	    }
+        		break;
+        	}
+		}
+	}
+	
+	@Override
+	public void onReadCompleted() {
+		//TODO if all sound uris are there, enable read button
+	    readButton.setEnabled(true);
+		toastMsg("db updated");
 	}
 	
 	public static Activity getActivity() {
@@ -63,7 +91,6 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 	
 	public void tryTranslate(View view) {
 	    //TODO hide keyboard if showing
-		//make textview clickable
 		translated.setOnClickListener(new View.OnClickListener() {
 	    	  @Override
 	    	  public void onClick(View v) {
@@ -82,6 +109,7 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 	public void tryRead(View view) {
 		if (originalString.length>0)
 			playNext(DPfinal.getActivity(), DPfinal.getDBHandler().getUri(originalString[0]), 1);
+		//If there are words without URI sound, disable read button.
 	}
 	
 	public void toastMsg(String string) {
@@ -89,11 +117,6 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 		int duration = Toast.LENGTH_SHORT;
 		Toast toast = Toast.makeText(context, string, duration);
 		toast.show();
-	}
-
-	@Override
-	public void onReadCompleted() {
-		 toastMsg("db updated");
 	}
 
 	private void playNext(Activity activity, Uri uri, int i) {
@@ -121,21 +144,4 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 		startActivity(intent);
 	}
 
-	@Override
-	public void onTranslatedCompleted() {
-		String toRead = translated.getText().toString();
-		originalString = toRead.split(" "); 
-		String[] missing = DPfinal.getDBHandler().getMissingWords(toRead);
-		for (int i = 0; i<missing.length; i++){
-        	if (!missing[i].equals("*")){
-        		toastMsg("updating online db...");
-        		if (networkInfo != null && networkInfo.isConnected()) {
-        	        new UpdateDb(this).execute(toRead);
-        	    } else {
-        	       toastMsg("No network connection available");
-        	    }
-        		break;
-        	}
-		}
-	}
 }

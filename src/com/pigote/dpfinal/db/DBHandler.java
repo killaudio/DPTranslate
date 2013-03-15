@@ -84,10 +84,10 @@ public class DBHandler extends SQLiteOpenHelper{
 
 	    cursor.moveToFirst();
 	    stringToFixUri = cursor.getString(0);
+	    if (stringToFixUri.length() > 2)
 	    myUri = Uri.parse(stringToFixUri.substring(5));
 	    if (cursor.getCount()<1){
 	    	Log.d("myDebug", myWord+" DOESN'T EXISTS IN DB!! (DBHandler.getUri)" );
-	    	
    		}
     	return myUri;
     }
@@ -106,7 +106,7 @@ public class DBHandler extends SQLiteOpenHelper{
 		}
 		cursor.moveToFirst();
 		if (cursor.getCount()<1){
-	    	Log.d("myDebug", s+" DOESN'T EXISTS IN DB!! (DBHandler.getUri)" );
+	    	Log.d("myDebug", s+" DOESN'T EXISTS IN DB!! (DBHandler.getDefinition)" );
    		} else {
    			def = cursor.getString(0);
    		}

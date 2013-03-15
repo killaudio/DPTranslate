@@ -35,7 +35,7 @@ public class UpdateDb extends AsyncTask<String, String, String>{
 	    try {
             return goRead(params[0]);
         } catch (Exception e) {
-        	Log.d("myDebug", "goRead Exception! " + e.getMessage());
+        	Log.d("myDebug", "UpdateDB Exception! " + e.getMessage());
             return null;
         }
 	}
@@ -86,6 +86,8 @@ public class UpdateDb extends AsyncTask<String, String, String>{
 		            }
 		            conn.disconnect();
 		            
+		         } catch (Exception e ) {
+		        	 Log.d("myDebug", missing[i] + "Couldnt be found online" + e.toString());
 		         } finally {
 		             if (is != null) {
 		                 is.close();

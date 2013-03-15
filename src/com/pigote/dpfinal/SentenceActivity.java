@@ -1,5 +1,7 @@
 package com.pigote.dpfinal;
 
+import java.util.Locale;
+
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,19 +18,25 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.TextToSpeech.OnInitListener;
 import android.support.v4.app.NavUtils;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 
-public class SentenceActivity extends ListActivity {
+public class SentenceActivity extends ListActivity implements OnInitListener {
 
 	private PopupWindow pw;
 	private String currentWord;
+	private TextToSpeech talker;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		talker = new TextToSpeech(this, this);
+
 		super.onCreate(savedInstanceState);
 	    // Get the message from the intent
 	    Intent intent = getIntent();
@@ -53,6 +61,16 @@ public class SentenceActivity extends ListActivity {
 	}
 
 	@Override
+   public void onDestroy() {
+      if (talker != null) {
+         talker.stop();
+         talker.shutdown();
+      }
+      super.onDestroy();
+   }
+
+	
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
@@ -76,7 +94,6 @@ public class SentenceActivity extends ListActivity {
 	  }
 
 	private void initiatePopupWindow(String s) {
-		//TODO start here: woman returns not in database when querying a second time with inexistent word "woman" then "woman piriguete" 
 		String tmpDef = DPfinal.getDBHandler().getDefinition(s);
         currentWord = s;
 		if (tmpDef == null){
@@ -134,15 +151,39 @@ public class SentenceActivity extends ListActivity {
 	}
 
 	public void tryAdd(View v){
-		EditText defText = (EditText) v.findViewById(R.id.AWdefinition);
+		EditText defText = (EditText) pw.getContentView().findViewById(R.id.AWdefinition);
 		DPfinal.getDBHandler().addDefinition(currentWord, defText.getText().toString());
+		Context context = getApplicationContext();
+		int duration = Toast.LENGTH_SHORT;
+		Toast toast = Toast.makeText(context, currentWord + " definition updated", duration);
+		toast.show();
 		pw.dismiss();
 	}
 	
 	protected void playWord() {
-		MediaPlayer mp = MediaPlayer.create(this, DPfinal.getDBHandler().getUri(currentWord));
+		Uri myUri = DPfinal.getDBHandler().getUri(currentWord);
+		if(myUri!=null){
+		MediaPlayer mp = MediaPlayer.create(this, myUri);
 		//MediaPlayer.create sometimes returns null because
 		//the file uses WAVE 8,000Hz MP3 8 kbit/s format, while android 2.3.3 supports only 8- and 16-bit linear PCM
 		mp.start();
+		} else {
+			//TODO Save talker to wav, update uri
+			talker.speak(currentWord, TextToSpeech.QUEUE_FLUSH, null);
+		}
+	}
+
+	@Override
+	public void onInit(int status) {
+		if (status == TextToSpeech.SUCCESS) {
+			int result = talker.setLanguage(Locale.US);
+	        if (result == TextToSpeech.LANG_MISSING_DATA
+	                    || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+	        	Log.e("TTS", "This Language is not supported");
+	        } 
+	 
+	    } else {
+	            Log.e("TTS", "Initilization Failed!");
+	    }
 	}
 }
