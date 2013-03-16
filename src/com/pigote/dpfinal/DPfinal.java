@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.view.Menu;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -45,6 +46,14 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 	    networkInfo = connMgr.getActiveNetworkInfo();
 	    myActivity = this;
 	    myDbHandler = DBHandler.getInstance(this);
+	    
+	    text.setOnClickListener(new View.OnClickListener() {
+	    	  @Override
+	    	  public void onClick(View v) {
+	    	    readButton.setEnabled(false);
+	    	  }
+	    	});
+      
 	}
 
 	@Override
@@ -57,8 +66,18 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 	@Override
 	public void onTranslatedCompleted() {
 		String toRead = translated.getText().toString();
-		originalString = toRead.split(" "); 
-		String[] missing = DPfinal.getDBHandler().getMissingWords(toRead);
+		String[] missing = DPfinal.getDBHandler().getMissingWords(toRead);		
+		
+		// TODO if there are no more missing entries, enable read button
+		int finalCount = 0;
+		for (int i=0; i<missing.length; i++){
+		   	if (missing[i].equals("*"))
+		   		finalCount++;
+		}
+		if (finalCount == missing.length)
+			readButton.setEnabled(true);
+		
+		//Update DB with missing entries
 		for (int i = 0; i<missing.length; i++){
         	if (!missing[i].equals("*")){
         		toastMsg("updating online db...");
@@ -74,8 +93,15 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 	
 	@Override
 	public void onReadCompleted() {
-		//TODO if all sound uris are there, enable read button
-	    readButton.setEnabled(true);
+		//TODO if there are no more missing entries, enable read button
+		String[] missingEntries = DPfinal.getDBHandler().getMissingWords(translated.getText().toString());
+	    int finalCount = 0;
+	    for (int i=0; i<missingEntries.length; i++){
+	    	if (missingEntries[i].equals("*"))
+	    		finalCount++;
+	    }
+	    if (finalCount == missingEntries.length)
+	    	readButton.setEnabled(true);
 		toastMsg("db updated");
 	}
 	
@@ -85,28 +111,36 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
     }
 
 	public static DBHandler getDBHandler() {
-        //TODO fix singleton
 		return myDbHandler;
     }
 	
 	public void tryTranslate(View view) {
-	    //TODO hide keyboard if showing
-		translated.setOnClickListener(new View.OnClickListener() {
+		//Close soft keyboard if showing
+		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(getWindow().getCurrentFocus().getWindowToken(), 0);
+    	
+        //enable clickable translated text
+        translated.setOnClickListener(new View.OnClickListener() {
 	    	  @Override
 	    	  public void onClick(View v) {
 	    	    startSentenceActivity(v);
 	    	  }
 	    	});
+        
 		String toRead = text.getText().toString();  
 	    toastMsg("Working on your translation...");
+	    
+	    //launch asyncTask DoTranslate 
 	    if (networkInfo != null && networkInfo.isConnected()) {
 	        new DoTranslate(this).execute(toRead);
 	    } else {
 	       toastMsg("No network connection available");
 	    }
+	    
 	}
 	
 	public void tryRead(View view) {
+		originalString = translated.getText().toString().split(" ");
 		if (originalString.length>0)
 			playNext(DPfinal.getActivity(), DPfinal.getDBHandler().getUri(originalString[0]), 1);
 		//If there are words without URI sound, disable read button.

@@ -168,7 +168,11 @@ public class SentenceActivity extends ListActivity implements OnInitListener {
 		//the file uses WAVE 8,000Hz MP3 8 kbit/s format, while android 2.3.3 supports only 8- and 16-bit linear PCM
 		mp.start();
 		} else {
-			//TODO Save talker to wav, update uri
+			//Save talker to wav, update uri
+			String filename = DPfinal.getActivity().getExternalFilesDir("wavs").toString();
+			filename = filename + "/" + currentWord + ".wav" ;
+			if (0==talker.synthesizeToFile(currentWord, null, filename))
+				DPfinal.getDBHandler().updateUri(currentWord, filename);
 			talker.speak(currentWord, TextToSpeech.QUEUE_FLUSH, null);
 		}
 	}

@@ -158,12 +158,29 @@ public class DBHandler extends SQLiteOpenHelper{
     	ContentValues values = new ContentValues();
     	values.put(KEY_WORD, currentWord); 
     	values.put(KEY_DEFINITION, string);
-    	values.put(KEY_URI, " "); 
+    	values.put(KEY_URI, " ");
     	 
     	// Inserting Row
     	db.insert(TABLE_DICTIONARY, null, values);
     	db.close(); // Closing database connection
 		
+	}
+	
+	//deletes entry without uri, re-enters complete entry
+	public void updateUri(String currentWord, String filename) {
+		String definition = getDefinition(currentWord);
+		
+		SQLiteDatabase db = this.getWritableDatabase();
+	   	db.delete(TABLE_DICTIONARY, KEY_WORD + "=?", new String[] {currentWord});
+		
+    	ContentValues values = new ContentValues();
+    	values.put(KEY_WORD, currentWord); 
+    	values.put(KEY_DEFINITION, definition);
+    	values.put(KEY_URI, filename);
+    	 
+    	// Inserting Row
+    	db.insert(TABLE_DICTIONARY, null, values);
+    	db.close(); // Closing database connection
 	}
 
 }
