@@ -29,7 +29,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.pigote.dpfinal.SentenceActivity"
+            android:name="com.pigote.dpfinal.sentence.SentenceActivity"
             android:label="@string/title_activity_sentence"
             android:parentActivityName="com.pigote.dpfinal.DPfinal" >
             <meta-data

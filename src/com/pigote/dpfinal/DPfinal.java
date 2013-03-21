@@ -1,6 +1,7 @@
 package com.pigote.dpfinal;
 
 import com.pigote.dpfinal.db.DBHandler;
+import com.pigote.dpfinal.sentence.SentenceActivity;
 
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
@@ -53,7 +54,6 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 	    	    readButton.setEnabled(false);
 	    	  }
 	    	});
-      
 	}
 
 	@Override
@@ -114,6 +114,13 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 		return myDbHandler;
     }
 	
+	public void startSentenceActivity(View view){
+		Intent intent = new Intent(this, SentenceActivity.class);
+		String message = translated.getText().toString();
+		intent.putExtra(EXTRA_MESSAGE, message);
+		startActivity(intent);
+	}
+	
 	public void tryTranslate(View view) {
 		//Close soft keyboard if showing
 		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -156,26 +163,21 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 	private void playNext(Activity activity, Uri uri, int i) {
 		final int w = i;
 		handler = new Handler();
-		mp = MediaPlayer.create(activity, uri);
-		//MediaPlayer.create sometimes returns null because
-		//the file uses WAVE 8,000Hz MP3 8 kbit/s format, while android 2.3.3 supports only 8- and 16-bit linear PCM
-		mp.start();
-		handler.postDelayed(new Runnable() {
-
-			@Override
-			public void run() {
-				mp.release();
-				if (w<originalString.length)
-				playNext(DPfinal.getActivity(), DPfinal.getDBHandler().getUri(originalString[w]), w+1);
-			}}, mp.getDuration() + 100);
-		
-	}
+		if (uri!= null){
+			mp = MediaPlayer.create(activity, uri);
+			//MediaPlayer.create sometimes returns null because
+			//the file uses WAVE 8,000Hz MP3 8 kbit/s format, while android 2.3.3 supports only 8- and 16-bit linear PCM
+			mp.start();
+			handler.postDelayed(new Runnable() {
 	
-	public void startSentenceActivity(View view){
-		Intent intent = new Intent(this, SentenceActivity.class);
-		String message = translated.getText().toString();
-		intent.putExtra(EXTRA_MESSAGE, message);
-		startActivity(intent);
+				@Override
+				public void run() {
+					mp.release();
+					if (w<originalString.length)
+					playNext(DPfinal.getActivity(), DPfinal.getDBHandler().getUri(originalString[w]), w+1);
+				}}, mp.getDuration() + 100);
+		} else {
+			toastMsg("your version of android doesn't support this wav file");
+		}
 	}
-
 }

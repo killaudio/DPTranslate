@@ -11,7 +11,7 @@ import android.net.Uri;
 import android.util.Log;
 
 public class DBHandler extends SQLiteOpenHelper{
-	// Instance
+	// Instance for singleton
 	private static DBHandler INSTANCE = null;
 	
 	// All Static variables
@@ -30,7 +30,6 @@ public class DBHandler extends SQLiteOpenHelper{
     private static final String KEY_DEFINITION = "definition";
     private static final String KEY_URI = "fileloc";
     
- 
     protected DBHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -56,16 +55,18 @@ public class DBHandler extends SQLiteOpenHelper{
     
     // Adding new entry
     public void addEntry(Entry entry) {
-    	SQLiteDatabase db = this.getWritableDatabase();
-    	 
-    	ContentValues values = new ContentValues();
-    	values.put(KEY_WORD, entry.word); 
-    	values.put(KEY_DEFINITION, entry.def);
-    	values.put(KEY_URI, entry.sound.toString()); 
-    	 
-    	// Inserting Row
-    	db.insert(TABLE_DICTIONARY, null, values);
-    	db.close(); // Closing database connection
+    	if (entry != null){
+	    	SQLiteDatabase db = this.getWritableDatabase();
+	    	 
+	    	ContentValues values = new ContentValues();
+	    	values.put(KEY_WORD, entry.word); 
+	    	values.put(KEY_DEFINITION, entry.def);
+	    	values.put(KEY_URI, entry.sound.toString()); 
+	    	 
+	    	// Inserting Row
+	    	db.insert(TABLE_DICTIONARY, null, values);
+	    	db.close(); // Closing database connection
+    	}
     }
      
     public Uri getUri(String myWord){
@@ -113,26 +114,6 @@ public class DBHandler extends SQLiteOpenHelper{
 		return def;
 	}
     
-   private boolean wordExists(String myWord){
-	    boolean exists = false;
-	    SQLiteDatabase db = this.getReadableDatabase();
-	    Cursor cursor;
-	    if (myWord.contains("'")){
-	    	String[] words = myWord.split("'");
-	    	cursor = db.rawQuery("SELECT " + KEY_WORD + " FROM " + TABLE_DICTIONARY + " WHERE " + KEY_WORD + 
-	    						" LIKE \'" + words[0] + "\'\'" + words[1] + "\'" , null);
-	    } else {
-	    	cursor  = db.rawQuery("SELECT " + KEY_WORD + " FROM " + TABLE_DICTIONARY + " WHERE " + KEY_WORD + 
-					" LIKE \'" + myWord + "\'", null);
-	    }
-	    
-	    if (cursor.getCount()>0){
-	    	exists = true;
-   		}
-	    return exists;
-   }
-   
-   
     // returns an array of missing words
     public String[] getMissingWords(String words) {
     	String[] myWords = words.split(" ");
@@ -152,13 +133,13 @@ public class DBHandler extends SQLiteOpenHelper{
     	else return new DBHandler(context);
     }
 
-	public void addDefinition(String currentWord, String string) {
+	public void addDefinition(String currentWord, String string, String uri) {
 		SQLiteDatabase db = this.getWritableDatabase();
    	 
     	ContentValues values = new ContentValues();
     	values.put(KEY_WORD, currentWord); 
     	values.put(KEY_DEFINITION, string);
-    	values.put(KEY_URI, " ");
+    	values.put(KEY_URI, uri);
     	 
     	// Inserting Row
     	db.insert(TABLE_DICTIONARY, null, values);
@@ -166,21 +147,22 @@ public class DBHandler extends SQLiteOpenHelper{
 		
 	}
 	
-	//deletes entry without uri, re-enters complete entry
-	public void updateUri(String currentWord, String filename) {
-		String definition = getDefinition(currentWord);
-		
-		SQLiteDatabase db = this.getWritableDatabase();
-	   	db.delete(TABLE_DICTIONARY, KEY_WORD + "=?", new String[] {currentWord});
-		
-    	ContentValues values = new ContentValues();
-    	values.put(KEY_WORD, currentWord); 
-    	values.put(KEY_DEFINITION, definition);
-    	values.put(KEY_URI, filename);
-    	 
-    	// Inserting Row
-    	db.insert(TABLE_DICTIONARY, null, values);
-    	db.close(); // Closing database connection
+	private boolean wordExists(String myWord){
+	    boolean exists = false;
+	    SQLiteDatabase db = this.getReadableDatabase();
+	    Cursor cursor;
+	    if (myWord.contains("'")){
+	    	String[] words = myWord.split("'");
+	    	cursor = db.rawQuery("SELECT " + KEY_WORD + " FROM " + TABLE_DICTIONARY + " WHERE " + KEY_WORD + 
+	    						" LIKE \'" + words[0] + "\'\'" + words[1] + "\'" , null);
+	    } else {
+	    	cursor  = db.rawQuery("SELECT " + KEY_WORD + " FROM " + TABLE_DICTIONARY + " WHERE " + KEY_WORD + 
+					" LIKE \'" + myWord + "\'", null);
+	    }
+		    
+	    if (cursor.getCount()>0){
+	    	exists = true;
+		}
+	    return exists;
 	}
-
 }

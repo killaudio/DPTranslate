@@ -11,7 +11,24 @@ import android.util.Xml;
 
 public class MWReaderXmlParser {
 	private static final String ns = null;
-	   
+	
+	//Defines an "entry", my database table unit. Contains a sound, a definition and the word
+    public static class Entry {
+        public URL sound;
+        public String def;
+        public String word;
+
+        private Entry(String word, URL sound, String def) {
+            this.sound = sound;
+            this.def = def;
+            this.word = word;
+        }
+        
+        public void addWord(String word){
+        	this.word = word;
+        }
+    }
+    
     public Entry parse(InputStream in) throws XmlPullParserException, IOException {
         try {
             XmlPullParser parser = Xml.newPullParser();
@@ -42,24 +59,8 @@ public class MWReaderXmlParser {
             }
         }  
         return myEntry;
-    }
+    }      
     
-    public static class Entry {
-        public URL sound;
-        public String def;
-        public String word;
-
-        private Entry(String word, URL sound, String def) {
-            this.sound = sound;
-            this.def = def;
-            this.word = word;
-        }
-        
-        public void addWord(String word){
-        	this.word = word;
-        }
-    }
-      
     // Parses the contents of an entry. If it encounters a title, summary, or link tag, hands them off
     // to their respective "read" methods for processing. Otherwise, skips the tag.
     private Entry readEntry(XmlPullParser parser) throws XmlPullParserException, IOException {
@@ -82,6 +83,8 @@ public class MWReaderXmlParser {
                 skip(parser);
             }
             if(sound!=null && def != null) {
+            	if (def.startsWith(":"))
+            		def = def.replace(":", " ");
             	break;
             }
         }

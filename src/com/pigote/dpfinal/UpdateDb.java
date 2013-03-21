@@ -23,10 +23,6 @@ public class UpdateDb extends AsyncTask<String, String, String>{
 	private OnDBUpdateCompleted listener;
 	private TextView translated;
 	private List<Entry> entries = new ArrayList<Entry>();
-		
-	public UpdateDb(OnDBUpdateCompleted listener){
-		this.listener = listener;
-	}
 	
 	@Override
 	protected String doInBackground(String... params) {
@@ -48,7 +44,11 @@ public class UpdateDb extends AsyncTask<String, String, String>{
         	listener.onReadCompleted();
         }
     }
-   
+
+	public UpdateDb(OnDBUpdateCompleted listener){
+		this.listener = listener;
+	}
+	
      // Do the web service tango here
     private String goRead(String toRead) throws Exception {
     	// Query local db, fill array of missing words
