@@ -116,7 +116,7 @@ public class SentenceActivity extends ListActivity implements OnInitListener {
 	
 	private void initiatePopupWindow(String s) {
 		String tmpDef = DPfinal.getDBHandler().getDefinition(s);
-        currentWord = s.toLowerCase();
+        currentWord = s.toLowerCase(Locale.ENGLISH);
         //Use Chain of Responsibility to handle Popup Window
         newWordHandler.handlePopup(s, tmpDef, this, pw);
         pw = PopupHandler.getPw();
@@ -145,16 +145,21 @@ public class SentenceActivity extends ListActivity implements OnInitListener {
 		String filename = DPfinal.getActivity().getExternalFilesDir("wavs").toString();
 		filename = filename + "/" + currentWord + ".wav" ;
 		if (0==talker.synthesizeToFile(currentWord, null, filename))
-			Log.d("myDebug", "tryADD generated sound successfully" + currentWord);
+			Log.d("myDebug", "tryADD generated sound successfully " + currentWord);
 
 		//add word, definition, and sound to DB
 		EditText defText = (EditText) pw.getContentView().findViewById(R.id.AWdefinition);
-		DPfinal.getDBHandler().addDefinition(currentWord, defText.getText().toString(), filename);
 		Context context = getApplicationContext();
 		int duration = Toast.LENGTH_SHORT;
-		Toast toast = Toast.makeText(context, currentWord + " definition updated", duration);
-		toast.show();
-		pw.dismiss();
+		//Validate definition entered by the user
+		if (!defText.getText().toString().isEmpty()){		
+			DPfinal.getDBHandler().addDefinition(currentWord, defText.getText().toString(), filename);
+			Toast toast = Toast.makeText(context, currentWord + " definition updated", duration);
+			toast.show();
+			pw.dismiss();
+		} else {
+			Toast toast = Toast.makeText(context, "Please enter a valid definition", duration);
+			toast.show();
+		}
 	}
-	
 }

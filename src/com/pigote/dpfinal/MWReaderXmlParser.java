@@ -24,10 +24,6 @@ public class MWReaderXmlParser {
             this.def = def;
             this.word = word;
         }
-        
-        public void addWord(String word){
-        	this.word = word;
-        }
     }
     
     public Entry parse(InputStream in, String word) throws XmlPullParserException, IOException {
@@ -97,7 +93,7 @@ public class MWReaderXmlParser {
             }
         }
         
-        return new Entry(" ", sound, def);
+        return new Entry(word, sound, def);
     }
 
     private URL buildSoundURL(String readSound) throws MalformedURLException {
@@ -120,22 +116,6 @@ public class MWReaderXmlParser {
         String wavFile = readText(parser);
         parser.require(XmlPullParser.END_TAG, ns, "wav");
         return wavFile;
-    }
-      
-    // Processes first definition in the feed.
-    private String readDef(XmlPullParser parser) throws IOException, XmlPullParserException {
-        String definition = null;
-        while (parser.getEventType() != XmlPullParser.END_DOCUMENT){
-       		if(parser.getEventType() == XmlPullParser.START_TAG)
-       			if (parser.getName().equals("dt"))
-       				break;
-        	parser.next();
-        }
-        parser.require(XmlPullParser.START_TAG, ns, "dt");
-        definition = readText(parser);
-        if (definition.equals(":"))
-        	return readDef(parser);
-        return definition;
     }
 
      // For the tags sound and readDef, extracts their text values.
