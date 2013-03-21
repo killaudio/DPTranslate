@@ -76,7 +76,7 @@ public class UpdateDb extends AsyncTask<String, String, String>{
 		            Log.d("myDebug", "Trying to get : " + missing[i].toLowerCase(Locale.ENGLISH));
 		            if (response==200){
 		            	is = conn.getInputStream();
-		            	entries.add(xmlParser.parse(is));
+		            	entries.add(xmlParser.parse(is, missing[i].toLowerCase(Locale.ENGLISH)));
 			            entries.get(entries.size()-1).addWord(missing[i].toLowerCase(Locale.ENGLISH));
 			            storeWavToExternal(entries.get(entries.size()-1));
 		            } else {

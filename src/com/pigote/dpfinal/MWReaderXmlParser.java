@@ -11,6 +11,7 @@ import android.util.Xml;
 
 public class MWReaderXmlParser {
 	private static final String ns = null;
+	private String word;
 	
 	//Defines an "entry", my database table unit. Contains a sound, a definition and the word
     public static class Entry {
@@ -29,12 +30,13 @@ public class MWReaderXmlParser {
         }
     }
     
-    public Entry parse(InputStream in) throws XmlPullParserException, IOException {
+    public Entry parse(InputStream in, String word) throws XmlPullParserException, IOException {
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
             parser.setInput(in, null);
             parser.nextTag();
+            this.word = word;
             return readFeed(parser);
         } finally {
             in.close();
@@ -67,21 +69,27 @@ public class MWReaderXmlParser {
         parser.require(XmlPullParser.START_TAG, ns, "entry");
         URL sound = null;
         String def = null;
+        String previousTagContent = null;
 
         while (parser.next() != XmlPullParser.END_DOCUMENT) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
             }
             String name = parser.getName();
+            
             if (name.equals("entry")) {
                 return readEntry(parser);
-            } else if (name.equals("sound")) {
+            } else if (!name.equals("sound")) {
+              	previousTagContent = readText(parser);
+              	if (sound!=null && name.equals("dt"))
+              		def = previousTagContent;
+            } else if (name.equals("sound")){ 
+            	if (previousTagContent.equals(word))
                 sound = buildSoundURL(readSound(parser));
-            } else if ((sound != null) && name.equals("def")) {
-                def = readDef(parser);
             } else {
                 skip(parser);
             }
+            
             if(sound!=null && def != null) {
             	if (def.startsWith(":"))
             		def = def.replace(":", " ");
@@ -110,7 +118,6 @@ public class MWReaderXmlParser {
     	parser.nextTag();
         parser.require(XmlPullParser.START_TAG, ns, "wav");
         String wavFile = readText(parser);
-        parser.next();
         parser.require(XmlPullParser.END_TAG, ns, "wav");
         return wavFile;
     }
@@ -140,6 +147,8 @@ public class MWReaderXmlParser {
         	parser.next();
         	result = parser.getText();
         }
+        while (parser.getEventType() != XmlPullParser.END_TAG)
+        	parser.next();
         return result;
     }
     
