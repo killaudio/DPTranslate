@@ -103,14 +103,11 @@ public class UpdateDb extends AsyncTask<String, String, String>{
 
 	private void storeWavToExternal(Entry entry) {
 		try {
-	        //set the download URL, a url that points to a file on the internet
 	        //this is the file to be downloaded
 	        URL url = entry.sound;
 
 	        //create the new connection
 	        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-
-	        //set up some things on the connection
 	        urlConnection.setRequestMethod("GET");
 	        urlConnection.setDoOutput(true);
 
@@ -126,30 +123,20 @@ public class UpdateDb extends AsyncTask<String, String, String>{
 	        	throw new IOException("SD CARD DIR == NULL");
 	        
 	        //create a new file, specifying the path, and the filename
-	        //which we want to save the file as.
 	        File file = new File(SDCardDir,entry.word+".wav");
 
-	        //this will be used to write the downloaded data into the file we created
 	        FileOutputStream fileOutput = new FileOutputStream(file);
 
 	        //this will be used in reading the data from the internet
 	        InputStream inputStream = urlConnection.getInputStream();
 
-	        //this is the total size of the file
-	        //int totalSize = urlConnection.getContentLength();
-	        //variable to store total downloaded bytes
-	        //int downloadedSize = 0;
-
 	        //create a buffer...
 	        byte[] buffer = new byte[1024];
 	        int bufferLength = 0; //used to store a temporary size of the buffer
 
-	        //now, read through the input buffer and write the contents to the file
+	        //read through the input buffer and write the contents to the file
 	        while ( (bufferLength = inputStream.read(buffer)) > 0 ) {
-	                //add the data in the buffer to the file in the file output stream (the file on the sd card
 	                fileOutput.write(buffer, 0, bufferLength);
-	                //add up the size so we know how much is downloaded
-	                //downloadedSize += bufferLength;
 	        }
 	        //close the output stream when done
 	        fileOutput.close();
