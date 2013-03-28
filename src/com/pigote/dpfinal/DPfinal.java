@@ -150,7 +150,6 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 		originalString = translated.getText().toString().split(" ");
 		if (originalString.length>0)
 			playNext(DPfinal.getActivity(), DPfinal.getDBHandler().getUri(originalString[0]), 1);
-		//If there are words without URI sound, disable read button.
 	}
 	
 	public void toastMsg(String string) {
@@ -177,7 +176,7 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 					playNext(DPfinal.getActivity(), DPfinal.getDBHandler().getUri(originalString[w]), w+1);
 				}}, mp.getDuration() + 100);
 		} else {
-			toastMsg("your version of android doesn't support this wav file");
+			toastMsg("Null URI, something wrong happened");
 		}
 	}
 }
