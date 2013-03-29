@@ -68,14 +68,7 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 		String toRead = translated.getText().toString();
 		String[] missing = DPfinal.getDBHandler().getMissingWords(toRead);		
 		
-		// TODO if there are no more missing entries, enable read button
-		int finalCount = 0;
-		for (int i=0; i<missing.length; i++){
-		   	if (missing[i].equals("*"))
-		   		finalCount++;
-		}
-		if (finalCount == missing.length)
-			readButton.setEnabled(true);
+		readButton.setEnabled(true);
 		
 		//Update DB with missing entries
 		for (int i = 0; i<missing.length; i++){
@@ -93,21 +86,11 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 	
 	@Override
 	public void onReadCompleted() {
-		//TODO if there are no more missing entries, enable read button
-		String[] missingEntries = DPfinal.getDBHandler().getMissingWords(translated.getText().toString());
-	    int finalCount = 0;
-	    for (int i=0; i<missingEntries.length; i++){
-	    	if (missingEntries[i].equals("*"))
-	    		finalCount++;
-	    }
-	    if (finalCount == missingEntries.length)
-	    	readButton.setEnabled(true);
 		toastMsg("db updated");
 	}
 	
 	public static Activity getActivity() {
         return myActivity;
-		
     }
 
 	public static DBHandler getDBHandler() {
@@ -147,9 +130,11 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 	}
 	
 	public void tryRead(View view) {
+		//Use the proxy design pattern to get a valid sound file.		
 		originalString = translated.getText().toString().split(" ");
+		UriBase proxyUri = new ProxyUri(originalString[0]);
 		if (originalString.length>0)
-			playNext(DPfinal.getActivity(), DPfinal.getDBHandler().getUri(originalString[0]), 1);
+			playNext(DPfinal.getActivity(), proxyUri.getUri(), 1);
 	}
 	
 	public void toastMsg(String string) {
@@ -173,7 +158,7 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 				public void run() {
 					mp.release();
 					if (w<originalString.length)
-					playNext(DPfinal.getActivity(), DPfinal.getDBHandler().getUri(originalString[w]), w+1);
+					playNext(DPfinal.getActivity(), new ProxyUri(originalString[w]).getUri(), w+1);
 				}}, mp.getDuration() + 100);
 		} else {
 			toastMsg("Null URI, something wrong happened");
