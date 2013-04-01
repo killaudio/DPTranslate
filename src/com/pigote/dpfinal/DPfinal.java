@@ -1,5 +1,7 @@
 package com.pigote.dpfinal;
 
+import java.util.Locale;
+
 import com.pigote.dpfinal.db.DBHandler;
 import com.pigote.dpfinal.sentence.SentenceActivity;
 
@@ -12,6 +14,9 @@ import android.os.Handler;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.TextToSpeech.OnInitListener;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -20,7 +25,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslateCompleted{
+public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslateCompleted, OnInitListener{
 
 	public final static String EXTRA_MESSAGE = "com.pigote.dpfinal.MESSAGE";
 	public final static String EXTRA_WORDS = "com.pigote.dpfinal.WORDS";
@@ -34,11 +39,14 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 	private static DBHandler myDbHandler;
 	private String[] originalString;
 	private MediaPlayer mp;
-	private Handler handler;
+	private Handler handler, handler2;
+	private TextToSpeech talker;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		talker = new TextToSpeech(this, this);
+		
 		setContentView(R.layout.activity_dpfinal);
 		text = (EditText) findViewById(R.id.textToTranslate);
 	    translated = (TextView) findViewById(R.id.translatedText);
@@ -62,6 +70,21 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 		getMenuInflater().inflate(R.menu.activity_dpfinal, menu);
 		return true;
 	}
+	
+	@Override
+	public void onInit(int status) {
+		if (status == TextToSpeech.SUCCESS) {
+			int result = talker.setLanguage(Locale.US);
+	        if (result == TextToSpeech.LANG_MISSING_DATA
+	                    || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+	        	Log.e("TTS", "This Language is not supported");
+	        } 
+	 
+	    } else {
+	            Log.e("TTS", "Initilization Failed!");
+	    }
+	}
+
 
 	@Override
 	public void onTranslatedCompleted() {
@@ -87,6 +110,15 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 	@Override
 	public void onReadCompleted() {
 		toastMsg("db updated");
+	}
+	
+	@Override
+	public void onDestroy() {
+		if (talker != null) {
+			talker.stop();
+			talker.shutdown();
+		}
+		super.onDestroy();
 	}
 	
 	public static Activity getActivity() {
@@ -130,20 +162,21 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 	}
 	
 	public void tryRead(View view) {
+		handler2 = new Handler();
 		//Use the proxy design pattern to get a valid sound file.		
 		originalString = translated.getText().toString().split(" ");
 		UriBase proxyUri = new ProxyUri(originalString[0]);
-		if (originalString.length>0)
-			playNext(DPfinal.getActivity(), proxyUri.getUri(), 1);
+		if (originalString.length>0){
+			final Uri uri = proxyUri.getUri(talker);
+			//TODO start testing here!! check tryRead and addDefinition in popup win
+			handler2.postDelayed(new Runnable(){
+				@Override
+				public void run() {
+				playNext(DPfinal.getActivity(), uri, 1);
+			}}, 100);
+		}
 	}
 	
-	public void toastMsg(String string) {
-		Context context = getApplicationContext();
-		int duration = Toast.LENGTH_SHORT;
-		Toast toast = Toast.makeText(context, string, duration);
-		toast.show();
-	}
-
 	private void playNext(Activity activity, Uri uri, int i) {
 		final int w = i;
 		handler = new Handler();
@@ -151,17 +184,25 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 			mp = MediaPlayer.create(activity, uri);
 			//MediaPlayer.create sometimes returns null because
 			//the file uses WAVE 8,000Hz MP3 8 kbit/s format, while android 2.3.3 supports only 8- and 16-bit linear PCM
-			mp.start();
-			handler.postDelayed(new Runnable() {
-	
-				@Override
-				public void run() {
-					mp.release();
-					if (w<originalString.length)
-					playNext(DPfinal.getActivity(), new ProxyUri(originalString[w]).getUri(), w+1);
-				}}, mp.getDuration() + 100);
+			if (mp!=null){
+				mp.start();
+				handler.postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						mp.release();
+						if (w<originalString.length)
+						playNext(DPfinal.getActivity(), new ProxyUri(originalString[w]).getUri(talker), w+1);
+					}}, mp.getDuration() + 100);
+			} else {toastMsg("MediaPlayer create failed");}
 		} else {
 			toastMsg("Null URI, something wrong happened");
 		}
+	}
+	
+	public void toastMsg(String string) {
+		Context context = getApplicationContext();
+		int duration = Toast.LENGTH_SHORT;
+		Toast toast = Toast.makeText(context, string, duration);
+		toast.show();
 	}
 }
