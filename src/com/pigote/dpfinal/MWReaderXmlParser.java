@@ -79,8 +79,9 @@ public class MWReaderXmlParser {
               	previousTagContent = readText(parser);
               	if (sound!=null && name.equals("dt"))
               		def = previousTagContent;
-            } else if (name.equals("sound")){ 
-            	if (previousTagContent.equals(word))
+            } else if (name.equals("sound")){
+            	String strip = previousTagContent.replace("*", "");
+            	if (strip.equals(word))
                 sound = buildSoundURL(readSound(parser));
             } else {
                 skip(parser);
@@ -102,7 +103,12 @@ public class MWReaderXmlParser {
     	pre = pre + "bix"  + '/' + readSound;
 		else if (readSound.startsWith("gg"))
 			pre = pre + "gg"  + '/' + readSound;
-		else pre = pre + readSound.toCharArray()[0] + '/' + readSound;
+		else if(readSound.startsWith("0") || readSound.startsWith("1") || readSound.startsWith("2") || 
+				readSound.startsWith("3") || readSound.startsWith("4") || readSound.startsWith("5") ||
+				readSound.startsWith("6") || readSound.startsWith("7") || readSound.startsWith("8") ||
+				readSound.startsWith("9")){
+			pre = pre + "number" + '/' + readSound;
+		} else pre = pre + readSound.toCharArray()[0] + '/' + readSound;
 		
 		URL soundURL = new URL(pre);
 				

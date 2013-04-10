@@ -39,7 +39,7 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 	private static DBHandler myDbHandler;
 	private String[] originalString;
 	private MediaPlayer mp;
-	private Handler handler, handler2;
+	private Handler handler;
 	private TextToSpeech talker;
 	
 	@Override
@@ -48,10 +48,10 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 		talker = new TextToSpeech(this, this);
 		
 		setContentView(R.layout.activity_dpfinal);
-		text = (EditText) findViewById(R.id.textToTranslate);
-	    translated = (TextView) findViewById(R.id.translatedText);
+		translated = (TextView) findViewById(R.id.translatedText);
 	    readButton = (Button) findViewById(R.id.read);
 	    connMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+	    text = (EditText) findViewById(R.id.textToTranslate);
 	    networkInfo = connMgr.getActiveNetworkInfo();
 	    myActivity = this;
 	    myDbHandler = DBHandler.getInstance(this);
@@ -152,6 +152,10 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 		String toRead = text.getText().toString();  
 	    toastMsg("Working on your translation...");
 	    
+	    //clean commas from string
+	    if (toRead.contains(","))
+	    	toRead = toRead.replace(",", "");
+	    
 	    //launch asyncTask DoTranslate 
 	    if (networkInfo != null && networkInfo.isConnected()) {
 	        new DoTranslate(this).execute(toRead);
@@ -162,18 +166,13 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 	}
 	
 	public void tryRead(View view) {
-		handler2 = new Handler();
 		//Use the proxy design pattern to get a valid sound file.		
 		originalString = translated.getText().toString().split(" ");
 		UriBase proxyUri = new ProxyUri(originalString[0]);
 		if (originalString.length>0){
 			final Uri uri = proxyUri.getUri(talker);
 			//TODO start testing here!! check tryRead and addDefinition in popup win
-			handler2.postDelayed(new Runnable(){
-				@Override
-				public void run() {
-				playNext(DPfinal.getActivity(), uri, 1);
-			}}, 100);
+			playNext(DPfinal.getActivity(), uri, 1);
 		}
 	}
 	
