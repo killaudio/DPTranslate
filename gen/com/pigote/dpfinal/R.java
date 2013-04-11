@@ -30,7 +30,7 @@ public final class R {
         public static final int AWword=0x7f080007;
         public static final int action_settings=0x7f080010;
         public static final int definition=0x7f08000c;
-        public static final int go=0x7f080000;
+        public static final int go=0x7f080002;
         public static final int menu_settings=0x7f08000f;
         public static final int myRelativeLayout=0x7f08000a;
         public static final int ok=0x7f08000d;
@@ -38,7 +38,7 @@ public final class R {
         public static final int read=0x7f080005;
         public static final int textToTranslate=0x7f080001;
         public static final int textView2=0x7f080003;
-        public static final int title=0x7f080002;
+        public static final int title=0x7f080000;
         public static final int translatedText=0x7f080004;
         public static final int word=0x7f08000b;
     }
