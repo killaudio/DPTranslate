@@ -6,7 +6,7 @@ import android.speech.tts.TextToSpeech;
 public class ProxyUri extends UriBase{
 	private Uri myUri;
 	private String word;
-	private UriBase realUri;
+	private RealUri realUri;
 	@Override
 	public Uri getUri(TextToSpeech talker) {
 		if (myUri == null){

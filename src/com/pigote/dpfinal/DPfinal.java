@@ -89,6 +89,18 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 	@Override
 	public void onTranslatedCompleted() {
 		String toRead = translated.getText().toString();
+		//clean string for searching entries
+	    if (toRead.contains(","))
+	    	toRead = toRead.replace(",", "");
+	    if (toRead.contains("."))
+	    	toRead = toRead.replace(".", "");
+	    if (toRead.contains("\""))
+	    	toRead = toRead.replace("\"", "");
+	    if (toRead.contains(":"))
+	    	toRead = toRead.replace(":", "");
+	    if (toRead.contains("?"))
+	    	toRead = toRead.replace("?", "");
+	    
 		String[] missing = DPfinal.getDBHandler().getMissingWords(toRead);		
 		
 		readButton.setEnabled(true);
@@ -150,11 +162,8 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 	    	});
         
 		String toRead = text.getText().toString();  
+		 
 	    toastMsg("Working on your translation...");
-	    
-	    //clean commas from string
-	    if (toRead.contains(","))
-	    	toRead = toRead.replace(",", "");
 	    
 	    //launch asyncTask DoTranslate 
 	    if (networkInfo != null && networkInfo.isConnected()) {
@@ -166,12 +175,26 @@ public class DPfinal extends Activity implements OnDBUpdateCompleted, OnTranslat
 	}
 	
 	public void tryRead(View view) {
-		//Use the proxy design pattern to get a valid sound file.		
-		originalString = translated.getText().toString().split(" ");
+
+		String toRead = translated.getText().toString();
+		//clean originalString:
+		//clean string for searching entries
+	    if (toRead.contains(","))
+	    	toRead = toRead.replace(",", "");
+	    if (toRead.contains("."))
+	    	toRead = toRead.replace(".", "");
+	    if (toRead.contains("\""))
+	    	toRead = toRead.replace("\"", "");
+	    if (toRead.contains(":"))
+	    	toRead = toRead.replace(":", "");
+	    if (toRead.contains("?"))
+	    	toRead = toRead.replace("?", "");
+		
+	    originalString = toRead.split(" ");
+	  //Use the proxy design pattern to get a valid sound file.
 		UriBase proxyUri = new ProxyUri(originalString[0]);
 		if (originalString.length>0){
 			final Uri uri = proxyUri.getUri(talker);
-			//TODO start testing here!! check tryRead and addDefinition in popup win
 			playNext(DPfinal.getActivity(), uri, 1);
 		}
 	}
